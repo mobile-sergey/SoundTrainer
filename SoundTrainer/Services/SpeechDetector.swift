@@ -65,7 +65,7 @@ actor SpeechDetector {
         }
         
         do {
-            try engine.prepare()
+            engine.prepare()
             try engine.start()
             print("Audio engine started successfully")
         } catch {

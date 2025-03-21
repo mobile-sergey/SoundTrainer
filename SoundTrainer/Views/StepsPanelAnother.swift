@@ -6,97 +6,177 @@ struct StepsPanelAnother: View {
     
     @State private var progress: CGFloat = 0
     @State private var starPositions: [Int: CGPoint] = [:]
-    @State private var size: CGSize = .zero
+    @State private var showFirework: Bool = false
+    @State private var fireworkPosition: CGPoint = .zero
     
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                Canvas { context, size in
-                    let stairWidth = size.width * BalloonConstants.stairWidthRatio
-                    let paddingFromBalloon = BalloonConstants.balloonRadius * 2
-                    
-                    var currentX = size.width - stairWidth - paddingFromBalloon
-                    
-                    // Рисуем ступеньки
-                    for (index, height) in BalloonConstants.levelHeights.enumerated() {
-                        let colors = BalloonConstants.mountainColors[index % BalloonConstants.mountainColors.count]
-                        
-                        // Создаем градиент для ступеньки
-                        let gradient = Gradient(colors: colors)
-                        let gradientRect = CGRect(
-                            x: currentX + paddingFromBalloon,
-                            y: size.height - height * progress,
-                            width: stairWidth,
-                            height: height
-                        )
-                        
-                        // Рисуем ступеньку с закругленными углами и градиентом
-                        context.fill(
-                            Path(
-                                roundedRect: gradientRect,
-                                cornerRadius: BalloonConstants.cornerRadius
-                            ),
-                            with: .linearGradient(
-                                gradient,
-                                startPoint: CGPoint(
-                                    x: 0,
-                                    y: size.height - height * progress
-                                ),
-                                endPoint: CGPoint(x: 0, y: size.height)
-                            )
-                        )
-                        
-                        currentX -= stairWidth
-                    }
-                }
-                .onChange(of: geometry.size) { newSize in
-                    updateStarPositions(size: newSize)
-                }
-                .onAppear {
-                    updateStarPositions(size: geometry.size)
-                }
-                
-                // Размещаем звезды
-                ForEach(
-                    Array(BalloonConstants.levelHeights.enumerated()),
-                    id: \.offset
-                ) { index, _ in
-                    if let position = starPositions[index] {
-                        StarItem(
-                            position: position,
-                            isCollected: collectedStars.indices
-                                .contains(index) ? collectedStars[index] : false,
-                            onCollect: { onStarCollected(index) }
-                        )
-                    }
-                }
-            }
-        }
-        .onAppear {
-            withAnimation(
-                .linear(duration: 2).repeatForever(autoreverses: false)
-            ) {
-                progress = 1
+                starsAndColumns(geometry)
+                astronaut(geometry)
+                firework
             }
         }
     }
     
-    private func updateStarPositions(size: CGSize) {
-        let stairWidth = size.width * BalloonConstants.stairWidthRatio
-        let paddingFromBalloon = BalloonConstants.balloonRadius * 2
-        let starRadius: CGFloat = 110
-        
-        var currentX = size.width - stairWidth - paddingFromBalloon
-        var newPositions: [Int: CGPoint] = [:]
-        
-        for (index, height) in BalloonConstants.levelHeights.enumerated() {
-            newPositions[index] = CGPoint(
-                x: currentX + paddingFromBalloon - stairWidth / 3,
-                y: size.height - height - starRadius
-            )
-            currentX -= stairWidth
+    // Выделяем столбцы со звездами в отдельное представление
+    private func starsAndColumns(_ geometry: GeometryProxy) -> some View {
+        HStack(alignment: .bottom, spacing: 15) {
+            Spacer(minLength: geometry.size.width * 0.3) // Уменьшаем пространство слева
+            ForEach(0..<3) { index in
+                columnWithStar(index: index, geometry: geometry)
+            }
         }
-        
-        starPositions = newPositions
+        .padding(.trailing, 30) // Небольшой отступ справа
+        .padding(.bottom, 30)
     }
+    
+    // Отдельное представление для столбца со звездой
+    private func columnWithStar(index: Int, geometry: GeometryProxy) -> some View {
+        VStack(spacing: 0) {
+            starView(index: index, geometry: geometry)
+            columnView(index: index, geometry: geometry)
+        }
+    }
+    
+    // Звезда
+    private func starView(index: Int, geometry: GeometryProxy) -> some View {
+        Image(systemName: "star.fill")
+            .foregroundColor(.yellow)
+            .font(.system(size: 40))
+            .padding(.bottom, 10)
+            .onTapGesture {
+                let xPosition = geometry.size.width - (30 + CGFloat(2-index) * 95) // Обновляем позицию фейерверка
+                fireworkPosition = CGPoint(x: xPosition, y: 50)
+                showFirework = true
+                onStarCollected(index)
+            }
+    }
+    
+    // Столбец
+    private func columnView(index: Int, geometry: GeometryProxy) -> some View {
+        let availableHeight = geometry.size.height * 0.85 // Оставляем 15% сверху для плашки записи
+        
+        return RoundedRectangle(cornerRadius: 25)
+            .fill(
+                LinearGradient(
+                    colors: getGradientColors(for: index),
+                    startPoint: .bottom,
+                    endPoint: .top
+                )
+            )
+            .frame(
+                width: 80,
+                height: getColumnHeight(index: index, totalHeight: availableHeight)
+            )
+    }
+    
+    // Космонавт
+    private func astronaut(_ geometry: GeometryProxy) -> some View {
+        let leftSpaceWidth = geometry.size.width * 0.3 // Пространство слева от столбцов
+        
+        return CommonLottieView(name: "astronaut_animation")
+            .setLoopMode(.loop)
+            .setContentMode(.scaleAspectFit)
+            .frame(width: 150, height: 150)
+            .offset(
+                x: -geometry.size.width/2 + (leftSpaceWidth/2), // Позиционируем в центре левого пространства
+                y: geometry.size.height/2 - 80
+            )
+    }
+    
+    // Фейерверк
+    private var firework: some View {
+        Group {
+            if showFirework {
+                FireworkEffect()
+                    .frame(width: 100, height: 100)
+                    .position(fireworkPosition)
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            showFirework = false
+                        }
+                    }
+            }
+        }
+    }
+    
+    private func getColumnHeight(index: Int, totalHeight: CGFloat) -> CGFloat {
+        let heights: [CGFloat] = [0.35, 0.7, 1.0] // Пропорции остаются теми же
+        return totalHeight * heights[index]
+    }
+    
+    private func getGradientColors(for index: Int) -> [Color] {
+        switch index {
+        case 0:
+            return [Color(hex: "4B7BF5"), Color(hex: "A682FF")] // Первый столбец синий-фиолетовый
+        case 1:
+            return [Color(hex: "6C7689"), Color(hex: "9BA5C9")] // Второй столбец серо-голубой
+        case 2:
+            return [Color(hex: "D9D9D9"), Color(hex: "FFFFFF")] // Третий столбец светло-серый
+        default:
+            return [.blue, .purple]
+        }
+    }
+}
+
+// Вспомогательное расширение для создания цвета из HEX
+extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3: // RGB (12-bit)
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: // RGB (24-bit)
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: // ARGB (32-bit)
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (255, 0, 0, 0)
+        }
+        self.init(
+            .sRGB,
+            red: Double(r) / 255,
+            green: Double(g) / 255,
+            blue:  Double(b) / 255,
+            opacity: Double(a) / 255
+        )
+    }
+}
+
+// Простой эффект фейерверка
+struct FireworkEffect: View {
+    @State private var scale: CGFloat = 0.1
+    @State private var opacity: Double = 1
+    
+    var body: some View {
+        ZStack {
+            ForEach(0..<8) { index in
+                Circle()
+                    .fill(Color.yellow)
+                    .frame(width: 10, height: 10)
+                    .offset(x: 50 * cos(Double(index) * .pi / 4) * scale,
+                           y: 50 * sin(Double(index) * .pi / 4) * scale)
+            }
+        }
+        .opacity(opacity)
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.5)) {
+                scale = 1
+                opacity = 0
+            }
+        }
+    }
+}
+
+#Preview {
+    StepsPanelAnother(
+        collectedStars: [false, false, false],
+        onStarCollected: { _ in }
+    )
+    .frame(width: 400, height: 600)
+    .background(Color.black)
 }
