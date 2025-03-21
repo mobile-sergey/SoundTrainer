@@ -11,9 +11,7 @@ import SwiftUI
 struct SoundTrainerApp: App {
     var body: some Scene {
         WindowGroup {
-            NavigationStack {
-                StartScreen()
-            }
+            StartScreen()
         }
     }
 }
