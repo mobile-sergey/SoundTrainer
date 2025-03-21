@@ -296,7 +296,7 @@
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SoundTrainer/Info.plist;
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "\"Приложению требуется доступ к микрофону для игры\"";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "\"Необходим доступ к микрофону для определения речи в игре\"";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -331,7 +331,7 @@
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SoundTrainer/Info.plist;
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "\"Приложению требуется доступ к микрофону для игры\"";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "\"Необходим доступ к микрофону для определения речи в игре\"";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

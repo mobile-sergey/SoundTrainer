@@ -58,14 +58,14 @@ struct StartScreen: View {
                 Group {
                     if #available(iOS 16, *) {
                         NavigationLink(
-                            destination: GameScreen(),
+                            destination: GameScreen(onExit: {}),
                             isActive: $isGameScreenPresented,
                             label: { EmptyView() }
                         )
                     } else {
                         NavigationLink(
                             "",
-                            destination: GameScreen(),
+                            destination: GameScreen(onExit: {}),
                             isActive: $isGameScreenPresented
                         )
                     }
