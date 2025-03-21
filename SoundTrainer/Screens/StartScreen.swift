@@ -28,8 +28,16 @@ struct StartScreen: View {
                     .fontWeight(.bold)
                     .foregroundColor(.blue)
                 
-                LottieView(name: "rocket_animation")
-                    .frame(width: 250, height: 250)
+                ZStack {
+                    Circle()
+                        .fill(Color.blue.opacity(0.1))
+                        .frame(width: 100, height: 100)
+                    
+                    LottieView(name: "rocket_animation")
+                        .frame(width: 200, height: 200)
+                        .clipShape(Circle())
+                }
+                .frame(width: 100, height: 100)
                 
                 Button(action: {
                     checkMicrophonePermission()
@@ -114,11 +122,20 @@ struct LottieView: UIViewRepresentable {
         let animationView = LottieAnimationView(name: name)
         animationView.loopMode = .loop
         animationView.contentMode = .scaleAspectFit
+        animationView.backgroundBehavior = .forceFinish
         animationView.play()
+        
+        // Настраиваем корректное масштабирование
+        animationView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        animationView.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
         return animationView
     }
     
-    func updateUIView(_ uiView: LottieAnimationView, context: Context) {}
+    func updateUIView(_ uiView: LottieAnimationView, context: Context) {
+        if !uiView.isAnimationPlaying {
+            uiView.play()
+        }
+    }
 }
 
 #Preview {
