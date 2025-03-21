@@ -1,10 +1,20 @@
 import SwiftUI
 
 struct StarryBackground: View {
-    let stars: [Star]
+    // Кэш для хранения сгенерированных звезд
+    private static var starsCache: [Int: [Star]] = [:]
+    
+    private let stars: [Star]
     
     init(starCount: Int = 200) {
-        self.stars = Self.generateStars(count: starCount)
+        // Используем кэшированные звезды если они есть, иначе генерируем новые
+        if let cachedStars = Self.starsCache[starCount] {
+            self.stars = cachedStars
+        } else {
+            let newStars = Self.generateStars(count: starCount)
+            Self.starsCache[starCount] = newStars
+            self.stars = newStars
+        }
     }
     
     var body: some View {
@@ -72,7 +82,7 @@ struct Star {
 
 // Предварительный просмотр
 #Preview {
-    StarryBackground()
+    StarryBackground(starCount: 200)
 }
 
 // Вспомогательное расширение для анимации звезд (опционально)
