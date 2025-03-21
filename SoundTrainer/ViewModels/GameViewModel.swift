@@ -6,22 +6,54 @@ class GameViewModel: ObservableObject {
     @Published private(set) var state: BalloonState = .Initial
     private let speechDetector: SpeechDetector
     private var cancellables = Set<AnyCancellable>()
+    private var isPreparingAudio = false
     
     init(speechDetector: SpeechDetector = SpeechDetector()) {
         self.speechDetector = speechDetector
         resetGame()
         
-        // Подписываемся на изменения состояния речи с правильной обработкой потока
-        speechDetector.isUserSpeakingPublisher
-            .debounce(for: .milliseconds(100), scheduler: DispatchQueue.main)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isSpeaking in
-                guard let self = self else { return }
-                Task { @MainActor in
-                    self.processIntent(.speakingChanged(isSpeaking: isSpeaking))
+        // Подготавливаем аудио заранее
+        prepareAudio()
+        
+        // Настраиваем подписку на publisher в отдельной задаче
+        setupSpeechDetection()
+    }
+    
+    private func setupSpeechDetection() {
+        Task {
+            let publisher = await speechDetector.isUserSpeakingPublisher
+            
+            publisher
+                .debounce(for: .milliseconds(100), scheduler: DispatchQueue.main)
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] isSpeaking in
+                    guard let self = self else { return }
+                    Task { @MainActor in
+                        self.processIntent(.speakingChanged(isSpeaking: isSpeaking))
+                    }
+                }
+                .store(in: &cancellables)
+        }
+    }
+    
+    // Добавляем метод для предварительной подготовки аудио
+    private func prepareAudio() {
+        guard !isPreparingAudio else { return }
+        isPreparingAudio = true
+        
+        Task.detached(priority: .userInitiated) {
+            do {
+                try await self.speechDetector.prepare()
+                await MainActor.run {
+                    self.isPreparingAudio = false
+                }
+            } catch {
+                print("Error preparing audio: \(error.localizedDescription)")
+                await MainActor.run {
+                    self.isPreparingAudio = false
                 }
             }
-            .store(in: &cancellables)
+        }
     }
     
     func processIntent(_ intent: BalloonIntent) {
@@ -41,16 +73,21 @@ class GameViewModel: ObservableObject {
         Task { @MainActor in
             print("Starting sound detection")
             if !state.isDetectingActive {
-                speechDetector.startRecording()
+                // Запускаем запись в фоновом потоке
+                Task.detached(priority: .userInitiated) {
+                    await self.speechDetector.startRecording()
+                    await MainActor.run {
+                        self.state.isDetectingActive = true
+                    }
+                }
             }
-            state.isDetectingActive = true
         }
     }
     
     func stopDetecting() {
         Task { @MainActor in
             print("Stopping sound detection")
-            speechDetector.stopRecording()
+            await speechDetector.stopRecording()
             state.isDetectingActive = false
         }
     }
@@ -119,10 +156,15 @@ class GameViewModel: ObservableObject {
         return BalloonConstants.lottieHeights[level]
     }
     
-    deinit {
-        Task { @MainActor in
-            stopDetecting()
+    func cleanup() {
+        print("Cleaning up GameViewModel")
+        Task {
+            await speechDetector.stopRecording()
         }
+    }
+    
+    deinit {
+        // Просто логируем, очистка уже должна быть выполнена
         print("ViewModel cleared")
     }
 } 

@@ -9,7 +9,11 @@ struct BalloonAnimation: View {
     @State private var lastLevelCheck: Int = 0
     
     var body: some View {
-        BalloonLottieView(name: "astronaut_animation")
+        CommonLottieView(name: "astronaut_animation")
+            .setLoopMode(.playOnce)
+            .setContentMode(.scaleAspectFill)
+            .setSpeed(1.0)
+            .setPlaying(true)
             .frame(width: 180, height: 180)
             .offset(x: state.xOffset, y: animatedY)
             .onChange(of: state.balloonPosition) { newPosition in

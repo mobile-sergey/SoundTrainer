@@ -29,7 +29,11 @@ struct StartScreen: View {
                     .foregroundColor(.blue)
                 
                 ZStack {
-                    LottieView(name: "rocket_animation")
+                    CommonLottieView(name: "rocket_animation")
+                        .setLoopMode(.loop)
+                        .setContentMode(.scaleAspectFill)
+                        .setSpeed(1.5)
+                        .setPlaying(true)
                         .frame(width: 250, height: 250)
                         .clipShape(Circle())
                 }

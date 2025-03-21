@@ -15,10 +15,11 @@ struct AnimatedStar: View {
     
     var body: some View {
         if !isCollected || showCollectAnimation {
-            StarLottieView(name: isCollected ? "star_animation_after_eating_3" : "star_animation_before_eating") { lottieView in
-                lottieView.loopMode = .playOnce
-                lottieView.animationSpeed = 0.8
-            }
+            CommonLottieView(name: isCollected ? "star_animation_after_eating_3" : "star_animation_before_eating")
+                .setLoopMode(.playOnce)
+                .setContentMode(.scaleAspectFill)
+                .setSpeed(0.8)
+                .setPlaying(isCollected)
             .frame(width: 120, height: 120)
             .background(Color.clear)
             .zIndex(0.5)

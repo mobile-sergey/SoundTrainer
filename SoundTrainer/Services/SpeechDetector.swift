@@ -1,102 +1,170 @@
 import AVFoundation
 import Combine
 
-class SpeechDetector {
+actor SpeechDetector {
     private var audioEngine: AVAudioEngine?
     private var isRecording = false
     private var cancellables = Set<AnyCancellable>()
+    private var isPrepared = false
+    private var timerCancellable: AnyCancellable?
     
     private let isUserSpeakingSubject = CurrentValueSubject<Bool, Never>(false)
     var isUserSpeakingPublisher: AnyPublisher<Bool, Never> {
         isUserSpeakingSubject.eraseToAnyPublisher()
     }
     
-    func startRecording() {
-        guard !isRecording else {
-            print("Already recording")
-            return
+    func prepare() async throws {
+        guard !isPrepared else { return }
+        
+        // Сначала настраиваем аудио сессию
+        let audioSession = AVAudioSession.sharedInstance()
+        try audioSession.setCategory(.record, mode: .measurement, options: .mixWithOthers)
+        try audioSession.setActive(true)
+        
+        // Создаем engine после настройки сессии
+        audioEngine = AVAudioEngine()
+        guard let inputNode = audioEngine?.inputNode else {
+            throw NSError(domain: "SpeechDetector", code: -1, userInfo: [NSLocalizedDescriptionKey: "Could not access input node"])
         }
         
-        print("Starting recording...")
+        // Создаем формат на основе настроек аудио сессии
+        let format = AVAudioFormat(
+            commonFormat: .pcmFormatFloat32,
+            sampleRate: audioSession.sampleRate,
+            channels: AVAudioChannelCount(audioSession.inputNumberOfChannels),
+            interleaved: false
+        )
+        
+        guard let format = format else {
+            throw NSError(domain: "SpeechDetector", code: -3, userInfo: [NSLocalizedDescriptionKey: "Could not create audio format"])
+        }
+        
+        print("Audio format configuration:")
+        print("Sample Rate: \(format.sampleRate)")
+        print("Channel Count: \(format.channelCount)")
+        print("Common Format: \(format.commonFormat.rawValue)")
+        
+        // Проверяем валидность формата
+        guard format.sampleRate > 0 && format.channelCount > 0 else {
+            throw NSError(domain: "SpeechDetector", code: -4, userInfo: [NSLocalizedDescriptionKey: "Invalid audio format"])
+        }
+        
+        // Используем меньший размер буфера
+        let bufferSize = AVAudioFrameCount(4096) // Используем фиксированный размер буфера
+        
+        // Захватываем self как weak для предотвращения цикла удержания
+        inputNode.installTap(onBus: 0, bufferSize: bufferSize, format: format) { [weak self] buffer, _ in
+            guard let self = self else { return }
+            Task {
+                await self.processAudioBuffer(buffer)
+            }
+        }
+        
+        guard let engine = audioEngine else {
+            throw NSError(domain: "SpeechDetector", code: -2, userInfo: [NSLocalizedDescriptionKey: "AudioEngine is nil"])
+        }
         
         do {
-            // Настройка аудио сессии
-            try AVAudioSession.sharedInstance().setCategory(.record, mode: .measurement, options: .mixWithOthers)
-            try AVAudioSession.sharedInstance().setActive(true)
-            
-            // Инициализация аудио движка
-            audioEngine = AVAudioEngine()
-            guard let inputNode = audioEngine?.inputNode else {
-                throw NSError(domain: "SpeechDetector", code: -1, userInfo: [NSLocalizedDescriptionKey: "Could not access input node"])
+            try engine.prepare()
+            try engine.start()
+            print("Audio engine started successfully")
+        } catch {
+            print("Failed to start audio engine: \(error.localizedDescription)")
+            throw error
+        }
+        
+        isRecording = true
+        isPrepared = true
+    }
+    
+    func startRecording() async {
+        do {
+            if !isPrepared {
+                try await prepare()
             }
             
-            let recordingFormat = inputNode.outputFormat(forBus: 0)
-            let bufferSize = AVAudioFrameCount(BalloonConstants.sampleRate)
+            print("Starting recording...")
             
-            inputNode.installTap(onBus: 0, bufferSize: bufferSize, format: recordingFormat) { [weak self] buffer, time in
-                guard let self = self else { return }
-                self.processAudioBuffer(buffer)
-            }
-            
-            audioEngine?.prepare()
-            try audioEngine?.start()
-            isRecording = true
-            
-            print("Recording started successfully")
-            
-            // Запускаем таймер для проверки звука
-            Timer.publish(every: BalloonConstants.soundCheckInterval, on: .main, in: .common)
+            // Создаем и сохраняем подписку на таймер
+            timerCancellable = Timer.publish(every: BalloonConstants.soundCheckInterval, on: .main, in: .common)
                 .autoconnect()
                 .sink { [weak self] _ in
-                    self?.checkAudioLevel()
+                    guard let self = self else { return }
+                    Task {
+                        await self.checkAudioLevel()
+                    }
                 }
-                .store(in: &cancellables)
             
         } catch {
             print("Error starting recording: \(error.localizedDescription)")
-            stopRecording()
+            await stopRecording()
         }
     }
     
-    func stopRecording() {
-        guard isRecording else { return }
+    func stopRecording() async {
+        print("Stopping recording...")
         
-        cancellables.removeAll()
-        audioEngine?.inputNode.removeTap(onBus: 0)
-        audioEngine?.stop()
+        // Сначала отменяем таймер
+        timerCancellable?.cancel()
+        timerCancellable = nil
+        
+        guard isRecording else {
+            print("Recording was not active")
+            return
+        }
+        
+        if let inputNode = audioEngine?.inputNode {
+            print("Removing tap from input node")
+            inputNode.removeTap(onBus: 0)
+        }
+        
+        if let engine = audioEngine {
+            print("Stopping audio engine")
+            engine.stop()
+        }
+        
         audioEngine = nil
         isRecording = false
+        isPrepared = false
         
-        try? AVAudioSession.sharedInstance().setActive(false)
+        do {
+            print("Deactivating audio session")
+            try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        } catch {
+            print("Error deactivating audio session: \(error.localizedDescription)")
+        }
         
         print("Recording stopped successfully")
     }
     
-    private func processAudioBuffer(_ buffer: AVAudioPCMBuffer) {
+    private func processAudioBuffer(_ buffer: AVAudioPCMBuffer) async {
         guard let channelData = buffer.floatChannelData?[0] else { return }
         let frameLength = UInt32(buffer.frameLength)
         
-        // Вычисляем среднюю амплитуду
         var sum: Float = 0
         for i in 0..<Int(frameLength) {
             sum += abs(channelData[i])
         }
         
         let average = sum / Float(frameLength)
-        let amplitude = average * 1000 // Масштабируем для соответствия с Android
+        let amplitude = average * 1000
         
         print("Amplitude: \(amplitude)")
         
-        // Обновляем состояние говорения
+        // Обновляем состояние внутри актора без использования MainActor
         isUserSpeakingSubject.send(amplitude > BalloonConstants.amplitudeThreshold)
     }
     
-    private func checkAudioLevel() {
+    private func checkAudioLevel() async {
         // Дополнительная логика проверки уровня звука, если необходимо
     }
     
     deinit {
-        stopRecording()
+        print("SpeechDetector deinit started")
+        // Отменяем таймер синхронно в deinit
+        timerCancellable?.cancel()
+        timerCancellable = nil
+        print("SpeechDetector deinit completed")
     }
 }
 
