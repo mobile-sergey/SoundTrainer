@@ -29,15 +29,11 @@ struct StartScreen: View {
                     .foregroundColor(.blue)
                 
                 ZStack {
-                    Circle()
-                        .fill(Color.blue.opacity(0.1))
-                        .frame(width: 100, height: 100)
-                    
                     LottieView(name: "rocket_animation")
-                        .frame(width: 200, height: 200)
+                        .frame(width: 250, height: 250)
                         .clipShape(Circle())
                 }
-                .frame(width: 100, height: 100)
+                .frame(width: 250, height: 250)
                 
                 Button(action: {
                     checkMicrophonePermission()
@@ -118,16 +114,26 @@ struct StartScreen: View {
 struct LottieView: UIViewRepresentable {
     let name: String
     
+    private static var animationCache: [String: LottieAnimationView] = [:]
+    
     func makeUIView(context: Context) -> LottieAnimationView {
+        if let cachedAnimation = Self.animationCache[name] {
+            if !cachedAnimation.isAnimationPlaying {
+                cachedAnimation.play()
+            }
+            return cachedAnimation
+        }
+        
         let animationView = LottieAnimationView(name: name)
         animationView.loopMode = .loop
         animationView.contentMode = .scaleAspectFit
-        animationView.backgroundBehavior = .forceFinish
+        animationView.backgroundBehavior = .pauseAndRestore
         animationView.play()
         
-        // Настраиваем корректное масштабирование
         animationView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         animationView.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
+        
+        Self.animationCache[name] = animationView
         return animationView
     }
     
