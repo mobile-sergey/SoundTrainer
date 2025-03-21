@@ -9,36 +9,54 @@ struct BalloonAnimation: View {
     @State private var lastLevelCheck: Int = 0
     
     var body: some View {
-        CommonLottieView(name: "astronaut_animation")
-            .setLoopMode(.playOnce)
-            .setContentMode(.scaleAspectFill)
-            .setSpeed(1.0)
-            .setPlaying(true)
-            .frame(width: 180, height: 180)
-            .offset(x: state.xOffset, y: animatedY)
-            .onChange(of: state.balloonPosition) { newPosition in
-                withAnimation(.linear(duration: calculateDuration())) {
-                    animatedY = newPosition
-                }
+        ZStack {
+            // Основная анимация космонавта
+            CommonLottieView(name: "astronaut_animation")
+                .setLoopMode(.loop)
+                .setContentMode(.scaleAspectFill)
+                .frame(width: 180, height: 180)
+                .offset(x: state.xOffset, y: animatedY)
+            
+            // Анимация сбора звезды
+            if state.shouldPlayStarAnimation && state.currentLevel < 3 {
+                CommonLottieView(name: "star_animation_before_eating")
+                    .setLoopMode(.playOnce)
+                    .setContentMode(.scaleAspectFill)
+                    .frame(width: 100, height: 100)
+                    .offset(x: state.xOffset, y: Constants.lottieHeights[state.currentLevel])
             }
-            .onChange(of: animatedY) { newY in
-                checkLevelProgress(newY: newY)
+            
+            // Анимация фейерверка
+            if state.shouldShowFireworks {
+                CommonLottieView(name: "firework_animation")
+                    .setLoopMode(.playOnce)
+                    .setContentMode(.scaleAspectFill)
+                    .frame(width: 300, height: 300)
             }
-            .onAppear {
-                animatedY = state.balloonPosition
+        }
+        .onChange(of: state.balloonPosition) { newPosition in
+            withAnimation(.linear(duration: 0.1)) {
+                animatedY = newPosition
             }
+        }
+        .onChange(of: animatedY) { newY in
+            checkLevelProgress(newY: newY)
+        }
+        .onAppear {
+            animatedY = state.balloonPosition
+        }
     }
     
     private func calculateDuration() -> Double {
-        let distance = BalloonConstants.riseDistance
-        let speed = state.isSpeaking ? BalloonConstants.riseSpeed : BalloonConstants.fallSpeed
+        let distance = Constants.riseDistance
+        let speed = state.isSpeaking ? Constants.riseSpeed : Constants.fallSpeed
         return Double(distance) / Double(speed)
     }
     
     private func checkLevelProgress(newY: CGFloat) {
-        guard state.currentLevel < BalloonConstants.lottieHeights.count,
+        guard state.currentLevel < Constants.lottieHeights.count,
               lastLevelCheck != state.currentLevel,
-              newY <= BalloonConstants.lottieHeights[state.currentLevel] else {
+              newY <= Constants.lottieHeights[state.currentLevel] else {
             return
         }
         

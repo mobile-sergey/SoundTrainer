@@ -27,22 +27,9 @@
 		A5192B612D8C206B00D5B903 /* SoundTrainer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SoundTrainer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		A5880E852D8D4C04003CBD62 /* Exceptions for "SoundTrainer" folder in "SoundTrainer" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = A5192B602D8C206B00D5B903 /* SoundTrainer */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A5192B632D8C206B00D5B903 /* SoundTrainer */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				A5880E852D8D4C04003CBD62 /* Exceptions for "SoundTrainer" folder in "SoundTrainer" target */,
-			);
 			path = SoundTrainer;
 			sourceTree = "<group>";
 		};
@@ -287,7 +274,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"SoundTrainer/Resources\"";
+				DEVELOPMENT_ASSET_PATHS = "\"SoundTrainer/App/Resources\"";
 				DEVELOPMENT_TEAM = 5HDD9A94JL;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -295,7 +282,7 @@
 					"$(PROJECT_DIR)/SoundTrainer",
 				);
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = SoundTrainer/Info.plist;
+				INFOPLIST_FILE = "";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "\"Необходим доступ к микрофону для определения речи в игре\"";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -322,7 +309,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"SoundTrainer/Resources\"";
+				DEVELOPMENT_ASSET_PATHS = "\"SoundTrainer/App/Resources\"";
 				DEVELOPMENT_TEAM = 5HDD9A94JL;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -330,7 +317,7 @@
 					"$(PROJECT_DIR)/SoundTrainer",
 				);
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = SoundTrainer/Info.plist;
+				INFOPLIST_FILE = "";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "\"Необходим доступ к микрофону для определения речи в игре\"";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

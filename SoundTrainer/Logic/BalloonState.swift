@@ -15,16 +15,20 @@ struct BalloonState: Equatable {
     var isSpeaking: Bool        // Флаг, указывающий, говорит ли пользователь в данный момент
     var isDetectingActive: Bool
     var collectedStars: [Bool]
+    var shouldPlayStarAnimation: Bool  // Добавляем новое свойство
+    var shouldShowFireworks: Bool      // Добавляем новое свойство
     
     static var Initial: BalloonState {
         BalloonState(
-            balloonPosition: BalloonConstants.baseY,
+            balloonPosition: Constants.baseY,
             currentLevel: 0,
-            xOffset: 0,
-            baseY: BalloonConstants.baseY,
+            xOffset: -150,
+            baseY: Constants.baseY,
             isSpeaking: false,
             isDetectingActive: false,
-            collectedStars: Array(repeating: false, count: BalloonConstants.levelHeights.count)
+            collectedStars: Array(repeating: false, count: Constants.levelHeights.count),
+            shouldPlayStarAnimation: false,  // Инициализируем новое свойство
+            shouldShowFireworks: false       // Инициализируем новое свойство
         )
     }
 }

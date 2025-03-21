@@ -13,7 +13,6 @@ struct StepsPanelAnother: View {
         GeometryReader { geometry in
             ZStack {
                 starsAndColumns(geometry)
-                astronaut(geometry)
                 firework
             }
         }
@@ -68,20 +67,6 @@ struct StepsPanelAnother: View {
             .frame(
                 width: 80,
                 height: getColumnHeight(index: index, totalHeight: availableHeight)
-            )
-    }
-    
-    // Космонавт
-    private func astronaut(_ geometry: GeometryProxy) -> some View {
-        let leftSpaceWidth = geometry.size.width * 0.3 // Пространство слева от столбцов
-        
-        return CommonLottieView(name: "astronaut_animation")
-            .setLoopMode(.loop)
-            .setContentMode(.scaleAspectFit)
-            .frame(width: 150, height: 150)
-            .offset(
-                x: -geometry.size.width/2 + (leftSpaceWidth/2), // Позиционируем в центре левого пространства
-                y: geometry.size.height/2 - 80
             )
     }
     

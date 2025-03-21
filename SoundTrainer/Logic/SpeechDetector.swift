@@ -8,8 +8,8 @@ actor SpeechDetector {
     private var isPrepared = false
     private var timerCancellable: AnyCancellable?
     
-    private let isUserSpeakingSubject = CurrentValueSubject<Bool, Never>(false)
-    var isUserSpeakingPublisher: AnyPublisher<Bool, Never> {
+    private let isUserSpeakingSubject = CurrentValueSubject<Float, Never>(0)
+    var isUserSpeakingPublisher: AnyPublisher<Float, Never> {
         isUserSpeakingSubject.eraseToAnyPublisher()
     }
     
@@ -86,7 +86,7 @@ actor SpeechDetector {
             print("Starting recording...")
             
             // Создаем и сохраняем подписку на таймер
-            timerCancellable = Timer.publish(every: BalloonConstants.soundCheckInterval, on: .main, in: .common)
+            timerCancellable = Timer.publish(every: Constants.soundCheckInterval, on: .main, in: .common)
                 .autoconnect()
                 .sink { [weak self] _ in
                     guard let self = self else { return }
@@ -149,10 +149,11 @@ actor SpeechDetector {
         let average = sum / Float(frameLength)
         let amplitude = average * 1000
         
-        print("Amplitude: \(amplitude)")
+        // Определяем, достаточно ли громкий звук для подъема
+        let isSpeaking = amplitude > Constants.amplitudeThreshold
         
-        // Обновляем состояние внутри актора без использования MainActor
-        isUserSpeakingSubject.send(amplitude > BalloonConstants.amplitudeThreshold)
+        // Отправляем результат
+        isUserSpeakingSubject.send(amplitude)
     }
     
     private func checkAudioLevel() async {
