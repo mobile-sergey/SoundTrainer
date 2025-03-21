@@ -16,12 +16,18 @@ struct GameScreen: View {
             StepsPanelAnother(
                 collectedStars: viewModel.state.collectedStars,
                 onStarCollected: { level in
-                    viewModel.collectStar(level: level)
+                    Task { @MainActor in
+                        viewModel.collectStar(level: level)
+                    }
                 }
             )
             .padding([.trailing, .bottom], 16)
             
             BalloonAnimation(state: viewModel.state, viewModel: viewModel)
+                .animation(.default, value: viewModel.state)
+                .transaction { transaction in
+                    transaction.animation = .default
+                }
             
             Button(action: onExit) {
                 Image(systemName: "arrow.backward")
@@ -31,10 +37,14 @@ struct GameScreen: View {
             .position(x: 40, y: 40)
         }
         .onAppear {
-            viewModel.startDetecting()
+            Task { @MainActor in
+                viewModel.startDetecting()
+            }
         }
         .onDisappear {
-            viewModel.stopDetecting()
+            Task { @MainActor in
+                viewModel.stopDetecting()
+            }
         }
     }
 }

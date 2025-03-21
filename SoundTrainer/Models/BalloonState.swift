@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct BalloonState {
+struct BalloonState: Equatable {
     var balloonPosition: CGFloat  // Текущая позиция шарика, управляется анимацией
     var currentLevel: Int         // Текущий достигнутый уровень (индекс в списке уровней)
     var xOffset: CGFloat         // Смещение шарика по X при переходе на новый уровень
@@ -18,13 +18,13 @@ struct BalloonState {
     
     static var Initial: BalloonState {
         BalloonState(
-            balloonPosition: BalloonConstants.initialLottieY,
+            balloonPosition: BalloonConstants.baseY,
             currentLevel: 0,
             xOffset: 0,
-            baseY: BalloonConstants.initialLottieY,
+            baseY: BalloonConstants.baseY,
             isSpeaking: false,
             isDetectingActive: false,
-            collectedStars: []
+            collectedStars: Array(repeating: false, count: BalloonConstants.levelHeights.count)
         )
     }
 }

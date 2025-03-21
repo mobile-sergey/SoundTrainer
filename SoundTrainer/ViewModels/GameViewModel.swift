@@ -11,44 +11,57 @@ class GameViewModel: ObservableObject {
         self.speechDetector = speechDetector
         resetGame()
         
-        // Подписываемся на изменения состояния речи
+        // Подписываемся на изменения состояния речи с правильной обработкой потока
         speechDetector.isUserSpeakingPublisher
+            .debounce(for: .milliseconds(100), scheduler: DispatchQueue.main)
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] isSpeaking in
-                self?.processIntent(.speakingChanged(isSpeaking: isSpeaking))
+                guard let self = self else { return }
+                Task { @MainActor in
+                    self.processIntent(.speakingChanged(isSpeaking: isSpeaking))
+                }
             }
             .store(in: &cancellables)
     }
     
     func processIntent(_ intent: BalloonIntent) {
-        switch intent {
-        case .speakingChanged(let isSpeaking):
-            handleSpeakingState(isSpeaking)
-        case .levelReached(let level):
-            handleLevelAchieved(level)
-        case .resetGame:
-            resetGame()
+        Task { @MainActor in
+            switch intent {
+            case .speakingChanged(let isSpeaking):
+                handleSpeakingState(isSpeaking)
+            case .levelReached(let level):
+                handleLevelAchieved(level)
+            case .resetGame:
+                resetGame()
+            }
         }
     }
     
     func startDetecting() {
-        print("Starting sound detection")
-        if !state.isDetectingActive {
-            speechDetector.startRecording()
+        Task { @MainActor in
+            print("Starting sound detection")
+            if !state.isDetectingActive {
+                speechDetector.startRecording()
+            }
+            state.isDetectingActive = true
         }
-        state.isDetectingActive = true
     }
     
     func stopDetecting() {
-        print("Stopping sound detection")
-        speechDetector.stopRecording()
-        state.isDetectingActive = false
+        Task { @MainActor in
+            print("Stopping sound detection")
+            speechDetector.stopRecording()
+            state.isDetectingActive = false
+        }
     }
     
     func collectStar(level: Int) {
-        if level < state.collectedStars.count {
-            var newStars = state.collectedStars
-            newStars[level] = true
-            state.collectedStars = newStars
+        Task { @MainActor in
+            if level < state.collectedStars.count {
+                var newStars = state.collectedStars
+                newStars[level] = true
+                state.collectedStars = newStars
+            }
         }
     }
     
@@ -107,8 +120,9 @@ class GameViewModel: ObservableObject {
     }
     
     deinit {
-        // TODO: Нужно разобраться с ошибкой: Call to main actor-isolated instance method 'stopDetecting()' in a synchronous nonisolated context
-//        stopDetecting()
+        Task { @MainActor in
+            stopDetecting()
+        }
         print("ViewModel cleared")
     }
 } 

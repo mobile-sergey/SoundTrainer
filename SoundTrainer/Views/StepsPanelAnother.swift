@@ -6,22 +6,19 @@ struct StepsPanelAnother: View {
     
     @State private var progress: CGFloat = 0
     @State private var starPositions: [Int: CGPoint] = [:]
+    @State private var size: CGSize = .zero
     
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                Canvas {
-                    context,
-                    size in
+                Canvas { context, size in
                     let stairWidth = size.width * BalloonConstants.stairWidthRatio
                     let paddingFromBalloon = BalloonConstants.balloonRadius * 2
-                    let starRadius: CGFloat = 110
                     
                     var currentX = size.width - stairWidth - paddingFromBalloon
                     
                     // Рисуем ступеньки
-                    for (index, height) in BalloonConstants.levelHeights
-                        .enumerated() {
+                    for (index, height) in BalloonConstants.levelHeights.enumerated() {
                         let colors = BalloonConstants.mountainColors[index % BalloonConstants.mountainColors.count]
                         
                         // Создаем градиент для ступеньки
@@ -49,29 +46,27 @@ struct StepsPanelAnother: View {
                             )
                         )
                         
-                        // Сохраняем позицию для звезды
-                        starPositions[index] = CGPoint(
-                            x: currentX + paddingFromBalloon - stairWidth / 3,
-                            y: size.height - height - starRadius
-                        )
                         currentX -= stairWidth
                     }
+                }
+                .onChange(of: geometry.size) { newSize in
+                    updateStarPositions(size: newSize)
+                }
+                .onAppear {
+                    updateStarPositions(size: geometry.size)
                 }
                 
                 // Размещаем звезды
                 ForEach(
                     Array(BalloonConstants.levelHeights.enumerated()),
                     id: \.offset
-                ) {
-                    index,
-                    _ in
+                ) { index, _ in
                     if let position = starPositions[index] {
                         StarItem(
                             position: position,
                             isCollected: collectedStars.indices
                                 .contains(index) ? collectedStars[index] : false,
-                            onCollect: { onStarCollected(index)
-                            }
+                            onCollect: { onStarCollected(index) }
                         )
                     }
                 }
@@ -84,5 +79,24 @@ struct StepsPanelAnother: View {
                 progress = 1
             }
         }
+    }
+    
+    private func updateStarPositions(size: CGSize) {
+        let stairWidth = size.width * BalloonConstants.stairWidthRatio
+        let paddingFromBalloon = BalloonConstants.balloonRadius * 2
+        let starRadius: CGFloat = 110
+        
+        var currentX = size.width - stairWidth - paddingFromBalloon
+        var newPositions: [Int: CGPoint] = [:]
+        
+        for (index, height) in BalloonConstants.levelHeights.enumerated() {
+            newPositions[index] = CGPoint(
+                x: currentX + paddingFromBalloon - stairWidth / 3,
+                y: size.height - height - starRadius
+            )
+            currentX -= stairWidth
+        }
+        
+        starPositions = newPositions
     }
 }

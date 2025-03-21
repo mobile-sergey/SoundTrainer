@@ -6,9 +6,10 @@ struct BalloonAnimation: View {
     let viewModel: GameViewModel
     
     @State private var animatedY: CGFloat = 0
+    @State private var lastLevelCheck: Int = 0
     
     var body: some View {
-        LottieView(name: "astronaut_animation")
+        BalloonLottieView(name: "astronaut_animation")
             .frame(width: 180, height: 180)
             .offset(x: state.xOffset, y: animatedY)
             .onChange(of: state.balloonPosition) { newPosition in
@@ -17,10 +18,10 @@ struct BalloonAnimation: View {
                 }
             }
             .onChange(of: animatedY) { newY in
-                if state.currentLevel < BalloonConstants.lottieHeights.count &&
-                    newY <= BalloonConstants.lottieHeights[state.currentLevel] {
-                    viewModel.processIntent(.levelReached(level: state.currentLevel))
-                }
+                checkLevelProgress(newY: newY)
+            }
+            .onAppear {
+                animatedY = state.balloonPosition
             }
     }
     
@@ -29,4 +30,22 @@ struct BalloonAnimation: View {
         let speed = state.isSpeaking ? BalloonConstants.riseSpeed : BalloonConstants.fallSpeed
         return Double(distance) / Double(speed)
     }
+    
+    private func checkLevelProgress(newY: CGFloat) {
+        guard state.currentLevel < BalloonConstants.lottieHeights.count,
+              lastLevelCheck != state.currentLevel,
+              newY <= BalloonConstants.lottieHeights[state.currentLevel] else {
+            return
+        }
+        
+        lastLevelCheck = state.currentLevel
+        
+        Task { @MainActor in
+            viewModel.processIntent(.levelReached(level: state.currentLevel))
+        }
+    }
+}
+
+#Preview {
+    BalloonAnimation(state: .Initial, viewModel: GameViewModel())
 } 
