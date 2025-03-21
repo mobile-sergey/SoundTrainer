@@ -8,12 +8,14 @@ struct CommonLottieView: UIViewRepresentable {
     var contentMode: UIView.ContentMode = .scaleAspectFit
     var animationSpeed: CGFloat = 1.0
     var shouldPlay: Bool = true
+    var onAnimationComplete: (() -> Void)?
     
     // MARK: - UIViewRepresentable
     func makeUIView(context: Context) -> UIView {
         let view = UIView()
         let animationView = LottieAnimationView()
         context.coordinator.animationView = animationView
+        context.coordinator.onAnimationComplete = onAnimationComplete
         
         if let animation = LottieAnimation.named(name) {
             animationView.animation = animation
@@ -26,6 +28,13 @@ struct CommonLottieView: UIViewRepresentable {
             
             if shouldPlay {
                 animationView.play()
+            }
+            
+            // Добавляем обработчик завершения
+            animationView.play { finished in
+                if finished {
+                    onAnimationComplete?()
+                }
             }
             
             // Настройка констрейнтов
@@ -72,6 +81,7 @@ struct CommonLottieView: UIViewRepresentable {
     
     class Coordinator {
         var animationView: LottieAnimationView?
+        var onAnimationComplete: (() -> Void)?
     }
 }
 
@@ -98,6 +108,12 @@ extension CommonLottieView {
     func setPlaying(_ isPlaying: Bool) -> CommonLottieView {
         var view = self
         view.shouldPlay = isPlaying
+        return view
+    }
+    
+    func onAnimationComplete(_ completion: @escaping () -> Void) -> CommonLottieView {
+        var view = self
+        view.onAnimationComplete = completion
         return view
     }
 }

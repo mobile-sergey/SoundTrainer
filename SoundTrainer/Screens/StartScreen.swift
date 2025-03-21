@@ -1,10 +1,12 @@
 import SwiftUI
 import Lottie
 import AVFoundation
+import os.log
 
 struct StartScreen: View {
     @State private var isGameScreenPresented = false
     @State private var showPermissionDialog = false
+    @State private var isRocketAnimationComplete = false
     
     var body: some View {
         if #available(iOS 16, *) {
@@ -28,18 +30,37 @@ struct StartScreen: View {
                     .fontWeight(.bold)
                     .foregroundColor(.blue)
                 
+                // Анимация с переходом между ракетой и космонавтом
                 ZStack {
-                    CommonLottieView(name: "rocket_animation")
-                        .setLoopMode(.loop)
-                        .setContentMode(.scaleAspectFill)
-                        .setSpeed(1.5)
-                        .setPlaying(true)
-                        .frame(width: 250, height: 250)
-                        .clipShape(Circle())
+                    if !isRocketAnimationComplete {
+                        CommonLottieView(name: "rocket_animation")
+                            .setLoopMode(.playOnce)
+                            .setContentMode(.scaleAspectFill)
+                            .setSpeed(1.0)
+                            .setPlaying(true)
+                            .onAnimationComplete { // Добавляем обработчик завершения анимации
+                                withAnimation(.easeOut(duration: 0.3)) {
+                                    isRocketAnimationComplete = true
+                                }
+                            }
+                            .frame(width: 250, height: 250)
+                            .clipShape(Circle())
+                    }
+                    
+                    if isRocketAnimationComplete {
+                        CommonLottieView(name: "astronaut_animation")
+                            .setLoopMode(.loop)
+                            .setContentMode(.scaleAspectFill)
+                            .setSpeed(1.0)
+                            .setPlaying(true)
+                            .frame(width: 250, height: 250)
+                            .transition(.opacity.animation(.easeIn(duration: 0.5)))
+                    }
                 }
                 .frame(width: 250, height: 250)
                 
                 Button(action: {
+                    os_log("Start button clicked", log: .default, type: .debug)
                     checkMicrophonePermission()
                 }) {
                     Text("Начать игру")
@@ -62,14 +83,18 @@ struct StartScreen: View {
                 Group {
                     if #available(iOS 16, *) {
                         NavigationLink(
-                            destination: GameScreen(onExit: {}),
+                            destination: GameScreen(onExit: {
+                                isRocketAnimationComplete = false // Сбрасываем состояние анимации при выходе
+                            }),
                             isActive: $isGameScreenPresented,
                             label: { EmptyView() }
                         )
                     } else {
                         NavigationLink(
                             "",
-                            destination: GameScreen(onExit: {}),
+                            destination: GameScreen(onExit: {
+                                isRocketAnimationComplete = false // Сбрасываем состояние анимации при выходе
+                            }),
                             isActive: $isGameScreenPresented
                         )
                     }
@@ -87,17 +112,23 @@ struct StartScreen: View {
     }
     
     private func checkMicrophonePermission() {
+        os_log("Checking microphone permission", log: .default, type: .debug)
         switch AVAudioSession.sharedInstance().recordPermission {
         case .granted:
+            os_log("Permission already granted", log: .default, type: .debug)
             isGameScreenPresented = true
         case .denied:
+            os_log("Permission denied", log: .default, type: .debug)
             showPermissionDialog = true
         case .undetermined:
+            os_log("Requesting permission", log: .default, type: .debug)
             AVAudioSession.sharedInstance().requestRecordPermission { granted in
                 DispatchQueue.main.async {
                     if granted {
+                        os_log("Permission granted", log: .default, type: .debug)
                         isGameScreenPresented = true
                     } else {
+                        os_log("Permission denied after request", log: .default, type: .debug)
                         showPermissionDialog = true
                     }
                 }
@@ -113,8 +144,6 @@ struct StartScreen: View {
         }
     }
 }
-
-
 
 #Preview {
     StartScreen()
