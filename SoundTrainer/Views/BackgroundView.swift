@@ -1,6 +1,14 @@
+//
+//  GameBackgroundView.swift
+//  SoundTrainer
+//
+//  Created by Sergey on 21.03.2025.
+//
+
+
 import SwiftUI
 
-struct StarryBackground: View {
+struct BackgroundView: View {
     // Кэш для хранения сгенерированных звезд
     private static var starsCache: [Int: [Star]] = [:]
     
@@ -82,11 +90,11 @@ struct Star {
 
 // Предварительный просмотр
 #Preview {
-    StarryBackground(starCount: 200)
+    BackgroundView(starCount: 200)
 }
 
 // Вспомогательное расширение для анимации звезд (опционально)
-extension StarryBackground {
+extension BackgroundView {
     func withAnimation() -> some View {
         self.modifier(StarTwinkleModifier())
     }

@@ -1,3 +1,11 @@
+//
+//  StartScreen.swift
+//  SoundTrainer
+//
+//  Created by Sergey on 21.03.2025.
+//
+
+
 import SwiftUI
 import Lottie
 import AVFoundation
@@ -33,7 +41,7 @@ struct StartScreen: View {
                 // Анимация с переходом между ракетой и космонавтом
                 ZStack {
                     if !isRocketAnimationComplete {
-                        CommonLottieView(name: "rocket_animation")
+                        AnimationView(name: "rocket_animation")
                             .setLoopMode(.playOnce)
                             .setContentMode(.scaleAspectFill)
                             .setSpeed(1.0)
@@ -48,7 +56,7 @@ struct StartScreen: View {
                     }
                     
                     if isRocketAnimationComplete {
-                        CommonLottieView(name: "astronaut_animation")
+                        AnimationView(name: "astronaut_animation")
                             .setLoopMode(.loop)
                             .setContentMode(.scaleAspectFill)
                             .setSpeed(1.0)

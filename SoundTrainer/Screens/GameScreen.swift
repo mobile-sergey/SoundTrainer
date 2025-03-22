@@ -1,9 +1,17 @@
+//
+//  GameScreen.swift
+//  SoundTrainer
+//
+//  Created by Sergey on 21.03.2025.
+//
+
+
 import SwiftUI
 
 struct GameScreen: View {
     @StateObject private var viewModel: GameViewModel
-    let onExit: () -> Void
     @State private var showMicrophoneAlert = false
+    let onExit: () -> Void
     
     init(onExit: @escaping () -> Void) {
         _viewModel = StateObject(wrappedValue: GameViewModel())
@@ -11,20 +19,8 @@ struct GameScreen: View {
     }
     
     var body: some View {
-        ZStack {
-            StarryBackground()
-            
-            StepsPanelAnother(
-                collectedStars: viewModel.state.collectedStars,
-                onStarCollected: { level in
-                    Task { @MainActor in
-                        viewModel.collectStar(level: level)
-                    }
-                }
-            )
-            .padding([.trailing, .bottom], 16)
-            
-            BalloonAnimation(state: viewModel.state, viewModel: viewModel)
+        ZStack {            
+            GameView(state: viewModel.state, viewModel: viewModel)
                 .animation(.default, value: viewModel.state)
                 .transaction { transaction in
                     transaction.animation = .default
@@ -79,4 +75,4 @@ struct GameScreen: View {
 
 #Preview {
     GameScreen(onExit: {})
-} 
+}

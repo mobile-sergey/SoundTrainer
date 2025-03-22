@@ -1,7 +1,15 @@
+//
+//  AnimationView.swift
+//  SoundTrainer
+//
+//  Created by Sergey on 21.03.2025.
+//
+
+
 import SwiftUI
 import Lottie
 
-struct CommonLottieView: UIViewRepresentable {
+struct AnimationView: UIViewRepresentable {
     // MARK: - Properties
     let name: String
     var loopMode: LottieLoopMode = .loop
@@ -86,32 +94,32 @@ struct CommonLottieView: UIViewRepresentable {
 }
 
 // MARK: - Convenience Modifiers
-extension CommonLottieView {
-    func setLoopMode(_ mode: LottieLoopMode) -> CommonLottieView {
+extension AnimationView {
+    func setLoopMode(_ mode: LottieLoopMode) -> AnimationView {
         var view = self
         view.loopMode = mode
         return view
     }
     
-    func setContentMode(_ mode: UIView.ContentMode) -> CommonLottieView {
+    func setContentMode(_ mode: UIView.ContentMode) -> AnimationView {
         var view = self
         view.contentMode = mode
         return view
     }
     
-    func setSpeed(_ speed: CGFloat) -> CommonLottieView {
+    func setSpeed(_ speed: CGFloat) -> AnimationView {
         var view = self
         view.animationSpeed = speed
         return view
     }
     
-    func setPlaying(_ isPlaying: Bool) -> CommonLottieView {
+    func setPlaying(_ isPlaying: Bool) -> AnimationView {
         var view = self
         view.shouldPlay = isPlaying
         return view
     }
     
-    func onAnimationComplete(_ completion: @escaping () -> Void) -> CommonLottieView {
+    func onAnimationComplete(_ completion: @escaping () -> Void) -> AnimationView {
         var view = self
         view.onAnimationComplete = completion
         return view
@@ -120,7 +128,7 @@ extension CommonLottieView {
 
 // MARK: - Preview
 #Preview {
-    CommonLottieView(name: "astronaut_animation")
+    AnimationView(name: "astronaut_animation")
         .setLoopMode(.playOnce)
         .setContentMode(.scaleAspectFill)
         .setSpeed(1.5)

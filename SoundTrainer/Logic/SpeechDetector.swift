@@ -1,3 +1,11 @@
+//
+//  SpeechDetector.swift
+//  SoundTrainer
+//
+//  Created by Sergey on 21.03.2025.
+//
+
+
 import AVFoundation
 import Combine
 
@@ -148,9 +156,6 @@ actor SpeechDetector {
         
         let average = sum / Float(frameLength)
         let amplitude = average * 1000
-        
-        // Определяем, достаточно ли громкий звук для подъема
-        let isSpeaking = amplitude > Constants.amplitudeThreshold
         
         // Отправляем результат
         isUserSpeakingSubject.send(amplitude)

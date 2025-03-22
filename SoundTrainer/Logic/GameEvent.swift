@@ -6,7 +6,7 @@
 //
 
 
-enum BalloonIntent {
+enum GameEvent {
     case speakingChanged(soundVolume: Float)
     case levelReached(level: Int)
     case resetGame

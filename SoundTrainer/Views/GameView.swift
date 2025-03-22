@@ -1,8 +1,16 @@
+//
+//  GameAnimationView.swift
+//  SoundTrainer
+//
+//  Created by Sergey on 21.03.2025.
+//
+
+
 import SwiftUI
 import Lottie
 
-struct BalloonAnimation: View {
-    let state: BalloonState
+struct GameView: View {
+    let state: GameState
     let viewModel: GameViewModel
     
     @State private var animatedY: CGFloat = 0
@@ -10,8 +18,20 @@ struct BalloonAnimation: View {
     
     var body: some View {
         ZStack {
+            BackgroundView()
+            
+            ColumsView(
+                collectedStars: viewModel.state.collectedStars,
+                onStarCollected: { level in
+                    Task { @MainActor in
+                        viewModel.collectStar(level: level)
+                    }
+                }
+            )
+            .padding([.trailing, .bottom], 16)
+            
             // Основная анимация космонавта
-            CommonLottieView(name: "astronaut_animation")
+            AnimationView(name: "astronaut_animation")
                 .setLoopMode(.loop)
                 .setContentMode(.scaleAspectFill)
                 .frame(width: 180, height: 180)
@@ -19,22 +39,22 @@ struct BalloonAnimation: View {
             
             // Анимация сбора звезды
             if state.shouldPlayStarAnimation && state.currentLevel < 3 {
-                CommonLottieView(name: "star_animation_before_eating")
+                AnimationView(name: "star_animation_before")
                     .setLoopMode(.playOnce)
                     .setContentMode(.scaleAspectFill)
                     .frame(width: 100, height: 100)
-                    .offset(x: state.xOffset, y: Constants.lottieHeights[state.currentLevel])
+                    .offset(x: state.xOffset, y: Constants.levelY[state.currentLevel])
             }
             
             // Анимация фейерверка
             if state.shouldShowFireworks {
-                CommonLottieView(name: "firework_animation")
+                AnimationView(name: "star_animation_after")
                     .setLoopMode(.playOnce)
                     .setContentMode(.scaleAspectFill)
                     .frame(width: 300, height: 300)
             }
         }
-        .onChange(of: state.balloonPosition) { newPosition in
+        .onChange(of: state.position) { newPosition in
             withAnimation(.linear(duration: 0.1)) {
                 animatedY = newPosition
             }
@@ -43,7 +63,7 @@ struct BalloonAnimation: View {
             checkLevelProgress(newY: newY)
         }
         .onAppear {
-            animatedY = state.balloonPosition
+            animatedY = state.position
         }
     }
     
@@ -54,9 +74,9 @@ struct BalloonAnimation: View {
     }
     
     private func checkLevelProgress(newY: CGFloat) {
-        guard state.currentLevel < Constants.lottieHeights.count,
+        guard state.currentLevel < Constants.levelY.count,
               lastLevelCheck != state.currentLevel,
-              newY <= Constants.lottieHeights[state.currentLevel] else {
+              newY <= Constants.levelY[state.currentLevel] else {
             return
         }
         
@@ -69,5 +89,5 @@ struct BalloonAnimation: View {
 }
 
 #Preview {
-    BalloonAnimation(state: .Initial, viewModel: GameViewModel())
+    GameView(state: .Initial, viewModel: GameViewModel())
 } 

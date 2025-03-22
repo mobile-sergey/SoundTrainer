@@ -1,7 +1,15 @@
+//
+//  StarView.swift
+//  SoundTrainer
+//
+//  Created by Sergey on 21.03.2025.
+//
+
+
 import SwiftUI
 import Lottie
 
-struct AnimatedStar: View {
+struct StarView: View {
     let isCollected: Bool
     let onCollect: () -> Void
     
@@ -15,7 +23,7 @@ struct AnimatedStar: View {
     
     var body: some View {
         if !isCollected || showCollectAnimation {
-            CommonLottieView(name: isCollected ? "star_animation_after_eating_3" : "star_animation_before_eating")
+            AnimationView(name: isCollected ? "star_animation_after" : "star_animation_before")
                 .setLoopMode(.playOnce)
                 .setContentMode(.scaleAspectFill)
                 .setSpeed(0.8)
@@ -45,11 +53,11 @@ struct AnimatedStar: View {
 // Предварительный просмотр
 #Preview {
     VStack(spacing: 20) {
-        AnimatedStar(isCollected: false) {
+        StarView(isCollected: false) {
             print("Star collected!")
         }
         
-        AnimatedStar(isCollected: true) {
+        StarView(isCollected: true) {
             print("Already collected star!")
         }
     }

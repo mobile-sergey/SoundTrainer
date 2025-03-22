@@ -1,6 +1,14 @@
+//
+//  ColumsView.swift
+//  SoundTrainer
+//
+//  Created by Sergey on 21.03.2025.
+//
+
+
 import SwiftUI
 
-struct StepsPanelAnother: View {
+struct ColumsView: View {
     let collectedStars: [Bool]
     let onStarCollected: (Int) -> Void
     
@@ -74,7 +82,7 @@ struct StepsPanelAnother: View {
     private var firework: some View {
         Group {
             if showFirework {
-                FireworkEffect()
+                FireworksView()
                     .frame(width: 100, height: 100)
                     .position(fireworkPosition)
                     .onAppear {
@@ -132,33 +140,9 @@ extension Color {
     }
 }
 
-// Простой эффект фейерверка
-struct FireworkEffect: View {
-    @State private var scale: CGFloat = 0.1
-    @State private var opacity: Double = 1
-    
-    var body: some View {
-        ZStack {
-            ForEach(0..<8) { index in
-                Circle()
-                    .fill(Color.yellow)
-                    .frame(width: 10, height: 10)
-                    .offset(x: 50 * cos(Double(index) * .pi / 4) * scale,
-                           y: 50 * sin(Double(index) * .pi / 4) * scale)
-            }
-        }
-        .opacity(opacity)
-        .onAppear {
-            withAnimation(.easeOut(duration: 0.5)) {
-                scale = 1
-                opacity = 0
-            }
-        }
-    }
-}
 
 #Preview {
-    StepsPanelAnother(
+    ColumsView(
         collectedStars: [false, false, false],
         onStarCollected: { _ in }
     )

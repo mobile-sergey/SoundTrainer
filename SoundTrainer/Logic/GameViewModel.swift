@@ -1,9 +1,17 @@
+//
+//  GameViewModel.swift
+//  SoundTrainer
+//
+//  Created by Sergey on 21.03.2025.
+//
+
+
 import SwiftUI
 import Combine
 
 @MainActor
 class GameViewModel: ObservableObject {
-    @Published private(set) var state: BalloonState = .Initial
+    @Published private(set) var state: GameState = .Initial
     private let speechDetector: SpeechDetector
     private var cancellables = Set<AnyCancellable>()
     private var isPreparingAudio = false
@@ -56,7 +64,7 @@ class GameViewModel: ObservableObject {
         }
     }
     
-    func processIntent(_ intent: BalloonIntent) {
+    func processIntent(_ intent: GameEvent) {
         Task { @MainActor in
             switch intent {
             case .speakingChanged(let soundVolume):
@@ -103,13 +111,13 @@ class GameViewModel: ObservableObject {
     }
     
     private func handleSpeakingState(_ soundVolume: Float) {
-        guard state.currentLevel < Constants.lottieHeights.count else { return }
+        guard state.currentLevel < Constants.levelY.count else { return }
         
         let isSpeaking: Bool = soundVolume > Constants.amplitudeThreshold
         let newPosition = calculateNewPosition(state: state, isSpeaking: isSpeaking)
         
         // Проверяем достижение уровня
-        let currentLevelHeight = Constants.lottieHeights[state.currentLevel]
+        let currentLevelHeight = Constants.levelY[state.currentLevel]
         if newPosition <= currentLevelHeight && !state.collectedStars[state.currentLevel] {
             print("Достигнут уровень \(state.currentLevel) на высоте \(currentLevelHeight)")
             
@@ -120,38 +128,38 @@ class GameViewModel: ObservableObject {
             processIntent(.levelReached(level: state.currentLevel))
             
             // Если это последняя звезда, показываем фейерверк
-            if state.currentLevel == Constants.lottieHeights.count - 1 {
+            if state.currentLevel == Constants.levelY.count - 1 {
                 state.shouldShowFireworks = true
             }
         }
         
         // Обновляем состояние
         state.isSpeaking = isSpeaking
-        state.balloonPosition = newPosition
+        state.position = newPosition
         
         print("Speaking: \(isSpeaking), Position: \(newPosition), Current Level: \(state.currentLevel), Sound Volume: \(soundVolume)")
     }
     
     private func handleLevelAchieved(_ level: Int) {
-        guard level < Constants.lottieHeights.count else { return }
+        guard level < Constants.levelY.count else { return }
         
         let newStars = updateStars(stars: state.collectedStars, level: level)
         state.currentLevel = level + 1
-        state.baseY = Constants.lottieHeights[level]
-        state.xOffset = Constants.lottieStairOffsets[level]
+        state.baseY = Constants.levelY[level]
+        state.xOffset = Constants.levelX[level]
         state.collectedStars = newStars
         
         print("Level \(level) achieved. Stars: \(newStars)")
     }
     
-    private func calculateNewPosition(state: BalloonState, isSpeaking: Bool) -> CGFloat {
+    private func calculateNewPosition(state: GameState, isSpeaking: Bool) -> CGFloat {
         let targetY: CGFloat
         if isSpeaking {
             // Движение вверх при громком звуке
-            targetY = state.balloonPosition - Constants.riseDistance
+            targetY = state.position - Constants.riseDistance
         } else {
             // Падение при тишине
-            targetY = state.balloonPosition + Constants.fallSpeed
+            targetY = state.position + Constants.fallSpeed
         }
         
         // Ограничиваем только нижнюю границу движения
@@ -162,7 +170,7 @@ class GameViewModel: ObservableObject {
     }
     
     private func updateStars(stars: [Bool], level: Int) -> [Bool] {
-        let correctedLevel = Constants.lottieHeights.count - 1 - level
+        let correctedLevel = Constants.levelY.count - 1 - level
         var newStars = stars
         if correctedLevel < stars.count {
             newStars[correctedLevel] = true
@@ -172,15 +180,15 @@ class GameViewModel: ObservableObject {
     
     private func resetGame() {
         state = .Initial
-        state.collectedStars = Array(repeating: false, count: Constants.levelHeights.count)
+        state.collectedStars = Array(repeating: false, count: Constants.levelY.count)
         print("Game state reset")
     }
     
     private func getCurrentLevelHeight(level: Int) -> CGFloat {
-        guard level < Constants.lottieHeights.count else {
-            return BalloonState.Initial.baseY
+        guard level < Constants.levelY.count else {
+            return GameState.Initial.baseY
         }
-        return Constants.lottieHeights[level]
+        return Constants.levelY[level]
     }
     
     func cleanup() {
@@ -194,4 +202,4 @@ class GameViewModel: ObservableObject {
         // Просто логируем, очистка уже должна быть выполнена
         print("ViewModel cleared")
     }
-} 
+}
