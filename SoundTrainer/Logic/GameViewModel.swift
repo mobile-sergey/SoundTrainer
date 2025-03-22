@@ -111,13 +111,13 @@ class GameViewModel: ObservableObject {
     }
     
     private func handleSpeakingState(_ soundVolume: Float) {
-        guard state.currentLevel < Constants.levelY.count else { return }
+        guard state.currentLevel < Constants.Level.y.count else { return }
         
-        let isSpeaking: Bool = soundVolume > Constants.amplitudeThreshold
+        let isSpeaking: Bool = soundVolume > Constants.Sound.amplitude
         let newPosition = calculateNewPosition(state: state, isSpeaking: isSpeaking)
         
         // Проверяем достижение уровня
-        let currentLevelHeight = Constants.levelY[state.currentLevel]
+        let currentLevelHeight = Constants.Level.y[state.currentLevel]
         if newPosition <= currentLevelHeight && !state.collectedStars[state.currentLevel] {
             print("Достигнут уровень \(state.currentLevel) на высоте \(currentLevelHeight)")
             
@@ -128,7 +128,7 @@ class GameViewModel: ObservableObject {
             processIntent(.levelReached(level: state.currentLevel))
             
             // Если это последняя звезда, показываем фейерверк
-            if state.currentLevel == Constants.levelY.count - 1 {
+            if state.currentLevel == Constants.Level.y.count - 1 {
                 state.shouldShowFireworks = true
             }
         }
@@ -141,12 +141,12 @@ class GameViewModel: ObservableObject {
     }
     
     private func handleLevelAchieved(_ level: Int) {
-        guard level < Constants.levelY.count else { return }
+        guard level < Constants.Level.y.count else { return }
         
         let newStars = updateStars(stars: state.collectedStars, level: level)
         state.currentLevel = level + 1
-        state.baseY = Constants.levelY[level]
-        state.xOffset = Constants.levelX[level]
+        state.baseY = Constants.Level.y[level]
+        state.xOffset = Constants.Level.x[level]
         state.collectedStars = newStars
         
         print("Level \(level) achieved. Stars: \(newStars)")
@@ -156,10 +156,10 @@ class GameViewModel: ObservableObject {
         let targetY: CGFloat
         if isSpeaking {
             // Движение вверх при громком звуке
-            targetY = state.position - Constants.riseDistance
+            targetY = state.position - Constants.Move.riseDistance
         } else {
             // Падение при тишине
-            targetY = state.position + Constants.fallSpeed
+            targetY = state.position + Constants.Move.fallSpeed
         }
         
         // Ограничиваем только нижнюю границу движения
@@ -170,7 +170,7 @@ class GameViewModel: ObservableObject {
     }
     
     private func updateStars(stars: [Bool], level: Int) -> [Bool] {
-        let correctedLevel = Constants.levelY.count - 1 - level
+        let correctedLevel = Constants.Level.y.count - 1 - level
         var newStars = stars
         if correctedLevel < stars.count {
             newStars[correctedLevel] = true
@@ -180,15 +180,15 @@ class GameViewModel: ObservableObject {
     
     private func resetGame() {
         state = .Initial
-        state.collectedStars = Array(repeating: false, count: Constants.levelY.count)
+        state.collectedStars = Array(repeating: false, count: Constants.Level.y.count)
         print("Game state reset")
     }
     
     private func getCurrentLevelHeight(level: Int) -> CGFloat {
-        guard level < Constants.levelY.count else {
+        guard level < Constants.Level.y.count else {
             return GameState.Initial.baseY
         }
-        return Constants.levelY[level]
+        return Constants.Level.y[level]
     }
     
     func cleanup() {

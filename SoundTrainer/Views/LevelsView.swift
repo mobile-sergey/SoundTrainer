@@ -12,49 +12,27 @@ struct LevelsView: View {
     let collectedStars: [Bool]
     let onStarCollected: (Int) -> Void
     
-    // Константы
-    private let stairWidthRatio: CGFloat = 0.2 // Аналог STAIR_WIDTH_RATIO
-    private let paddingFromAstronaut: CGFloat = 60 // Аналог PADDING_FROM_ASTRONAUT * 2
-    private let cornerRadius: CGFloat = 25 // Аналог CORNER_RADIUS
-    
     // Состояния для анимации
-    @State private var progress: CGFloat = 0.8
     @State private var starPositions: [Int: CGPoint] = [:]
-    @State private var showFirework: Bool = false
-    @State private var fireworkPosition: CGPoint = .zero
     
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                // Canvas заменяем на собственное представление для отрисовки колонок
-                columnsView(geometry)
-                
-                // Отрисовка звезд
-                ForEach(Array(starPositions.keys.sorted()), id: \.self) { index in
-                    if let position = starPositions[index] {
-                        StarView(
-                            position: position,
-                            isCollected: collectedStars.indices.contains(index) ? collectedStars[index] : false,
-                            onCollect: { onStarCollected(index) }
-                        )
-                    }
-                }
-                
-                firework
+                drawLevels(geometry)
+                drawStars()
             }
         }
     }
     
-    private func columnsView(_ geometry: GeometryProxy) -> some View {
-        let stairWidth = geometry.size.width * stairWidthRatio
-        let heights: [CGFloat] = [0.35, 0.7, 1.0] // Аналог LEVEL_HEIGHTS
+    private func drawLevels(_ geometry: GeometryProxy) -> some View {
+        let stairWidth = geometry.size.width * Constants.Level.width
         
         return ZStack {
             ForEach(0..<3) { index in
-                let height = geometry.size.height * heights[index]
-                let currentX = geometry.size.width - stairWidth - paddingFromAstronaut - (CGFloat(index) * stairWidth)
+                let height = geometry.size.height * Constants.Level.heights[index]
+                let currentX = geometry.size.width - stairWidth * 2.5 + (CGFloat(index) * stairWidth)
                 
-                RoundedRectangle(cornerRadius: cornerRadius)
+                RoundedRectangle(cornerRadius: 25)
                     .fill(
                         LinearGradient(
                             colors: getGradientColors(for: index),
@@ -62,31 +40,31 @@ struct LevelsView: View {
                             endPoint: .top
                         )
                     )
-                    .frame(width: stairWidth, height: height * progress)
-                    .position(x: currentX, y: geometry.size.height - (height * progress) / 2)
+                    .frame(width: stairWidth, height: height * Constants.Level.maxHeight)
+                    .position(x: currentX, y: geometry.size.height - (height * Constants.Level.maxHeight) / 2)
                     .onChange(of: geometry.size) { _ in
                         // Обновляем позиции звезд
                         starPositions[index] = CGPoint(
-                            x: currentX - stairWidth / 3,
-                            y: geometry.size.height - height - 55 // 55 - половина размера звезды
+                            x: currentX,
+                            y: geometry.size.height - (height * Constants.Level.maxHeight) + (CGFloat(index) * stairWidth / 3)
                         )
                     }
             }
         }
     }
     
-    // Фейерверк
-    private var firework: some View {
-        Group {
-            if showFirework {
-                FireworksView()
-                    .frame(width: 100, height: 100)
-                    .position(fireworkPosition)
-                    .onAppear {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                            showFirework = false
-                        }
-                    }
+    private func drawStars() -> some View {
+        
+        return ZStack {
+            ForEach(Array(starPositions.keys.sorted()), id: \.self) { index in
+                if let position = starPositions[index] {
+                    StarView(
+                        position: position,
+                        isCollected: false,
+                            // collectedStars.indices.contains(index) ? collectedStars[index] : false,
+                        onCollect: { onStarCollected(index) }
+                    )
+                }
             }
         }
     }

@@ -10,41 +10,38 @@ import SwiftUI
 
 enum Constants {
     
-    // MARK: - Начальное расположение
+    // MARK: - Космонавт
+    enum Cosmo {
+        static let y: CGFloat = 320  // Начальная позиция космонавта (внизу экрана)
+    }
     
-    static let baseY: CGFloat = 250  // Начальная позиция космонавта (внизу экрана)
+    // MARK: - Уровни
+    enum Level {
+        static let width: CGFloat = 0.25                    // Относительная ширина уровней
+        static let heights: [CGFloat] = [0.35, 0.7, 1.0]    // Относительные высоты уровней
+        static let maxHeight: CGFloat = 0.9                 // Максимальная относительная высота уровней
+        static let y: [CGFloat] = [200, 0, -200]            // Высоты уровней для звезд
+        static let x: [CGFloat] = [-100, 0, 100]            // Смещения по X для каждой ступеньки
+    }
     
-    // Расположение звёзд
-    static let stairY: [CGFloat] = [
-        330,   // Высота первой звезды (верхний уровень)
-        540,   // Высота второй звезды (средний уровень)
-        750    // Высота третьей звезды (нижний уровень)
-    ]
+    // MARK: - Движение
+    enum Move {
+        static let riseDistance: CGFloat = 10   // Расстояние подъема за одно обновление
+        static let riseSpeed: CGFloat = 50      // Скорость подъема при звуке
+        static let fallSpeed: CGFloat = 5       // Скорость падения при тишине
+    }
     
-    // Высоты уровней для звезд
-    static let levelY: [CGFloat] = [
-        200,    // Высота первой звезды (верхний уровень)
-        0,      // Высота второй звезды (средний уровень)
-        -200    // Высота третьей звезды (нижний уровень)
-    ]
-    
-    // Смещения по X для каждой ступеньки
-    static let levelX: [CGFloat] = [
-        -100,   // Смещение для первого уровня
-         0,     // Смещение для второго уровня
-         100    // Смещение для третьего уровня
-    ]
-    
-    // MARK: - Параметры движения
-    
-    static let riseDistance: CGFloat = 10       // Расстояние подъема за одно обновление
-    static let riseSpeed: CGFloat = 50          // Скорость подъема при звуке
-    static let fallSpeed: CGFloat = 5           // Скорость падения при тишине
-    static let amplitudeThreshold: Float = 10   // Порог громкости для подъема
-    
-    // MARK: - Параметры звука
-    
-    static let soundCheckInterval: TimeInterval = 0.1  // Интервал проверки звука (100 мс)
-    static let sampleRate: Int = 44100                 // Биттрейд аудио
-    
+    // MARK: - Звук
+    enum Sound {
+        static let amplitude: Float = 10                // Порог громкости для подъема
+        static let сheckInterval: TimeInterval = 0.1    // Интервал проверки звука (100 мс)
+    }
+
+    // MARK: - Анимации
+    enum Anim {
+        static let austronaut: String = "astronaut_animation"
+        static let rocket: String = "rocket_animation"
+        static let star: String = "star_animation_before"
+        static let fireworks: String = "star_animation_after"
+    }
 }

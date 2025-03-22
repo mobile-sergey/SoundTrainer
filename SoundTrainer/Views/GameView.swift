@@ -20,6 +20,7 @@ struct GameView: View {
         ZStack {
             BackgroundView()
             
+            // Уровни и звёзды
             LevelsView(
                 collectedStars: viewModel.state.collectedStars,
                 onStarCollected: { level in
@@ -28,31 +29,13 @@ struct GameView: View {
                     }
                 }
             )
-            .padding([.trailing, .bottom], 16)
             
             // Основная анимация космонавта
-            AnimationView(name: "astronaut_animation")
+            AnimationView(name: Constants.Anim.austronaut)
                 .setLoopMode(.loop)
                 .setContentMode(.scaleAspectFill)
                 .frame(width: 180, height: 180)
                 .offset(x: state.xOffset, y: animatedY)
-            
-            // Анимация сбора звезды
-            if state.shouldPlayStarAnimation && state.currentLevel < 3 {
-                AnimationView(name: "star_animation_before")
-                    .setLoopMode(.playOnce)
-                    .setContentMode(.scaleAspectFill)
-                    .frame(width: 100, height: 100)
-                    .offset(x: state.xOffset, y: Constants.levelY[state.currentLevel])
-            }
-            
-            // Анимация фейерверка
-            if state.shouldShowFireworks {
-                AnimationView(name: "star_animation_after")
-                    .setLoopMode(.playOnce)
-                    .setContentMode(.scaleAspectFill)
-                    .frame(width: 300, height: 300)
-            }
         }
         .onChange(of: state.position) { newPosition in
             withAnimation(.linear(duration: 0.1)) {
@@ -68,15 +51,15 @@ struct GameView: View {
     }
     
     private func calculateDuration() -> Double {
-        let distance = Constants.riseDistance
-        let speed = state.isSpeaking ? Constants.riseSpeed : Constants.fallSpeed
+        let distance = Constants.Move.riseDistance
+        let speed = state.isSpeaking ? Constants.Move.riseSpeed : Constants.Move.fallSpeed
         return Double(distance) / Double(speed)
     }
     
     private func checkLevelProgress(newY: CGFloat) {
-        guard state.currentLevel < Constants.levelY.count,
+        guard state.currentLevel < Constants.Level.y.count,
               lastLevelCheck != state.currentLevel,
-              newY <= Constants.levelY[state.currentLevel] else {
+              newY <= Constants.Level.y[state.currentLevel] else {
             return
         }
         
@@ -90,4 +73,4 @@ struct GameView: View {
 
 #Preview {
     GameView(state: .Initial, viewModel: GameViewModel())
-} 
+}

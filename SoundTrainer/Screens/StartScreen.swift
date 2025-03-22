@@ -41,7 +41,7 @@ struct StartScreen: View {
                 // Анимация с переходом между ракетой и космонавтом
                 ZStack {
                     if !isRocketAnimationComplete {
-                        AnimationView(name: "rocket_animation")
+                        AnimationView(name: Constants.Anim.rocket)
                             .setLoopMode(.playOnce)
                             .setContentMode(.scaleAspectFill)
                             .setSpeed(1.0)
@@ -56,7 +56,7 @@ struct StartScreen: View {
                     }
                     
                     if isRocketAnimationComplete {
-                        AnimationView(name: "astronaut_animation")
+                        AnimationView(name: Constants.Anim.austronaut)
                             .setLoopMode(.loop)
                             .setContentMode(.scaleAspectFill)
                             .setSpeed(1.0)

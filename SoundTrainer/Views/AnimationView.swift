@@ -128,7 +128,7 @@ extension AnimationView {
 
 // MARK: - Preview
 #Preview {
-    AnimationView(name: "astronaut_animation")
+    AnimationView(name: Constants.Anim.austronaut)
         .setLoopMode(.playOnce)
         .setContentMode(.scaleAspectFill)
         .setSpeed(1.5)

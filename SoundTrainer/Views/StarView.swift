@@ -29,7 +29,7 @@ struct StarView: View {
     var body: some View {
         ZStack {
             if isAnimating {
-                AnimationView(name: isCollected ? "star_animation_after" : "star_animation_before")
+                AnimationView(name: isCollected ? Constants.Anim.fireworks : Constants.Anim.star)
                     .setLoopMode(.playOnce)
                     .setContentMode(.scaleAspectFill)
                     .setSpeed(1.0)
