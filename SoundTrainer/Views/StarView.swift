@@ -1,64 +1,83 @@
 //
-//  StarView.swift
+//  StarItemView.swift
 //  SoundTrainer
 //
-//  Created by Sergey on 21.03.2025.
+//  Created by Sergey on 22.03.2025.
 //
 
 
 import SwiftUI
 import Lottie
 
+// Новый компонент для звезды
 struct StarView: View {
+    let position: CGPoint
     let isCollected: Bool
     let onCollect: () -> Void
     
-    @State private var showCollectAnimation: Bool
+    @State private var isAnimating: Bool = false
+    @State private var showStar: Bool = true
     
-    init(isCollected: Bool, onCollect: @escaping () -> Void) {
+    init(position: CGPoint, isCollected: Bool, onCollect: @escaping () -> Void) {
+        self.position = position
         self.isCollected = isCollected
         self.onCollect = onCollect
-        self._showCollectAnimation = State(initialValue: isCollected)
+        self._isAnimating = State(initialValue: true)
+        self._showStar = State(initialValue: !self.isAnimating)
     }
     
     var body: some View {
-        if !isCollected || showCollectAnimation {
-            AnimationView(name: isCollected ? "star_animation_after" : "star_animation_before")
-                .setLoopMode(.playOnce)
-                .setContentMode(.scaleAspectFill)
-                .setSpeed(0.8)
-                .setPlaying(isCollected)
-            .frame(width: 120, height: 120)
-            .background(Color.clear)
-            .zIndex(0.5)
-            .onTapGesture {
-                if !isCollected {
-                    onCollect()
-                }
-            }
-            .onChange(of: isCollected) { newValue in
-                if newValue {
-                    // Ждем завершения анимации
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                        showCollectAnimation = false
+        ZStack {
+            if isAnimating {
+                AnimationView(name: isCollected ? "star_animation_after" : "star_animation_before")
+                    .setLoopMode(.playOnce)
+                    .setContentMode(.scaleAspectFill)
+                    .setSpeed(1.0)
+                    .setPlaying(true)
+                    .onAnimationComplete {
+                        isAnimating = false
+                        showStar = !isCollected
                         onCollect()
                     }
-                }
+                    .frame(width: 120, height: 120)
+                    .position(position)
             }
+            
+            if showStar {
+                Image(systemName: "star.fill")
+                    .foregroundColor(.yellow)
+                    .font(.system(size: 54))
+                    .position(position)
+            }
+        }
+    }
+    
+    private func handleStarCollection() {
+        showStar = false
+        isAnimating = true
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            isAnimating = false
+            showStar = true
+            onCollect()
         }
     }
 }
 
-
-// Предварительный просмотр
 #Preview {
-    VStack(spacing: 20) {
-        StarView(isCollected: false) {
-            print("Star collected!")
-        }
-        
-        StarView(isCollected: true) {
-            print("Already collected star!")
-        }
-    }
-} 
+    StarView(
+        position: CGPoint(x: 200.0, y: 150.0),
+        isCollected: true,
+        onCollect: {}
+    )
+    .frame(width: 400, height: 300)
+    .background(Color.black)
+    
+    StarView(
+        position: CGPoint(x: 200.0, y: 150.0),
+        isCollected: false,
+        onCollect: {}
+    )
+    .frame(width: 400, height: 300)
+    .background(Color.black)
+}

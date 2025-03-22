@@ -20,7 +20,7 @@ struct GameView: View {
         ZStack {
             BackgroundView()
             
-            ColumsView(
+            LevelsView(
                 collectedStars: viewModel.state.collectedStars,
                 onStarCollected: { level in
                     Task { @MainActor in

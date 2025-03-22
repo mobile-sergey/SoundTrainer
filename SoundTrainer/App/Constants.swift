@@ -47,7 +47,4 @@ enum Constants {
     static let soundCheckInterval: TimeInterval = 0.1  // Интервал проверки звука (100 мс)
     static let sampleRate: Int = 44100                 // Биттрейд аудио
     
-    // MARK: - Параметры интерфейса
-    
-    static let cornerRadius: CGFloat = 16               // Радиус углов у кнопок
 }

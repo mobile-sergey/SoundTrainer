@@ -8,11 +8,17 @@
 
 import SwiftUI
 
-struct ColumsView: View {
+struct LevelsView: View {
     let collectedStars: [Bool]
     let onStarCollected: (Int) -> Void
     
-    @State private var progress: CGFloat = 0
+    // Константы
+    private let stairWidthRatio: CGFloat = 0.2 // Аналог STAIR_WIDTH_RATIO
+    private let paddingFromAstronaut: CGFloat = 60 // Аналог PADDING_FROM_ASTRONAUT * 2
+    private let cornerRadius: CGFloat = 25 // Аналог CORNER_RADIUS
+    
+    // Состояния для анимации
+    @State private var progress: CGFloat = 0.8
     @State private var starPositions: [Int: CGPoint] = [:]
     @State private var showFirework: Bool = false
     @State private var fireworkPosition: CGPoint = .zero
@@ -20,62 +26,53 @@ struct ColumsView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                starsAndColumns(geometry)
+                // Canvas заменяем на собственное представление для отрисовки колонок
+                columnsView(geometry)
+                
+                // Отрисовка звезд
+                ForEach(Array(starPositions.keys.sorted()), id: \.self) { index in
+                    if let position = starPositions[index] {
+                        StarView(
+                            position: position,
+                            isCollected: collectedStars.indices.contains(index) ? collectedStars[index] : false,
+                            onCollect: { onStarCollected(index) }
+                        )
+                    }
+                }
+                
                 firework
             }
         }
     }
     
-    // Выделяем столбцы со звездами в отдельное представление
-    private func starsAndColumns(_ geometry: GeometryProxy) -> some View {
-        HStack(alignment: .bottom, spacing: 15) {
-            Spacer(minLength: geometry.size.width * 0.3) // Уменьшаем пространство слева
-            ForEach(0..<3) { index in
-                columnWithStar(index: index, geometry: geometry)
-            }
-        }
-        .padding(.trailing, 30) // Небольшой отступ справа
-        .padding(.bottom, 30)
-    }
-    
-    // Отдельное представление для столбца со звездой
-    private func columnWithStar(index: Int, geometry: GeometryProxy) -> some View {
-        VStack(spacing: 0) {
-            starView(index: index, geometry: geometry)
-            columnView(index: index, geometry: geometry)
-        }
-    }
-    
-    // Звезда
-    private func starView(index: Int, geometry: GeometryProxy) -> some View {
-        Image(systemName: "star.fill")
-            .foregroundColor(.yellow)
-            .font(.system(size: 40))
-            .padding(.bottom, 10)
-            .onTapGesture {
-                let xPosition = geometry.size.width - (30 + CGFloat(2-index) * 95) // Обновляем позицию фейерверка
-                fireworkPosition = CGPoint(x: xPosition, y: 50)
-                showFirework = true
-                onStarCollected(index)
-            }
-    }
-    
-    // Столбец
-    private func columnView(index: Int, geometry: GeometryProxy) -> some View {
-        let availableHeight = geometry.size.height * 0.85 // Оставляем 15% сверху для плашки записи
+    private func columnsView(_ geometry: GeometryProxy) -> some View {
+        let stairWidth = geometry.size.width * stairWidthRatio
+        let heights: [CGFloat] = [0.35, 0.7, 1.0] // Аналог LEVEL_HEIGHTS
         
-        return RoundedRectangle(cornerRadius: 25)
-            .fill(
-                LinearGradient(
-                    colors: getGradientColors(for: index),
-                    startPoint: .bottom,
-                    endPoint: .top
-                )
-            )
-            .frame(
-                width: 80,
-                height: getColumnHeight(index: index, totalHeight: availableHeight)
-            )
+        return ZStack {
+            ForEach(0..<3) { index in
+                let height = geometry.size.height * heights[index]
+                let currentX = geometry.size.width - stairWidth - paddingFromAstronaut - (CGFloat(index) * stairWidth)
+                
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .fill(
+                        LinearGradient(
+                            colors: getGradientColors(for: index),
+                            startPoint: .bottom,
+                            endPoint: .top
+                        )
+                    )
+                    .frame(width: stairWidth, height: height * progress)
+                    .position(x: currentX, y: geometry.size.height - (height * progress) / 2)
+                    .onChange(of: geometry.size) { _ in
+                        // Обновляем позиции звезд
+                        starPositions[index] = CGPoint(
+                            x: currentX - stairWidth / 3,
+                            y: geometry.size.height - height - 55 // 55 - половина размера звезды
+                        )
+                    }
+            }
+        }
     }
     
     // Фейерверк
@@ -92,11 +89,6 @@ struct ColumsView: View {
                     }
             }
         }
-    }
-    
-    private func getColumnHeight(index: Int, totalHeight: CGFloat) -> CGFloat {
-        let heights: [CGFloat] = [0.35, 0.7, 1.0] // Пропорции остаются теми же
-        return totalHeight * heights[index]
     }
     
     private func getGradientColors(for index: Int) -> [Color] {
@@ -142,8 +134,8 @@ extension Color {
 
 
 #Preview {
-    ColumsView(
-        collectedStars: [false, false, false],
+    LevelsView(
+        collectedStars: [false, true, false],
         onStarCollected: { _ in }
     )
     .frame(width: 400, height: 600)
