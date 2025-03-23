@@ -12,7 +12,7 @@ enum Constants {
     
     // MARK: - Космонавт
     enum Cosmo {
-        static let y: CGFloat = 320  // Начальная позиция космонавта (внизу экрана)
+        static let y: CGFloat = 550  // Начальная позиция космонавта (внизу экрана)
     }
     
     // MARK: - Уровни

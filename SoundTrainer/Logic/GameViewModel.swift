@@ -114,11 +114,14 @@ class GameViewModel: ObservableObject {
         guard state.currentLevel < Constants.Level.y.count else { return }
         
         let isSpeaking: Bool = soundVolume > Constants.Sound.amplitude
-        let newPosition = calculateNewPosition(state: state, isSpeaking: isSpeaking)
+        let targetPosition = calculateNewPosition(state: state, isSpeaking: isSpeaking)
+        
+        // Обновляем позицию
+        state.position = targetPosition
         
         // Проверяем достижение уровня
-        let currentLevelHeight = Constants.Level.y[state.currentLevel]
-        if newPosition <= currentLevelHeight && !state.collectedStars[state.currentLevel] {
+        let currentLevelHeight = Constants.Level.y[state.currentLevel] * UIScreen.main.bounds.height // Высота уровня в пикселях
+        if state.position >= currentLevelHeight && !state.collectedStars[state.currentLevel] {
             print("Достигнут уровень \(state.currentLevel) на высоте \(currentLevelHeight)")
             
             // Запускаем анимацию сбора звезды
@@ -135,9 +138,8 @@ class GameViewModel: ObservableObject {
         
         // Обновляем состояние
         state.isSpeaking = isSpeaking
-        state.position = newPosition
         
-        print("Speaking: \(isSpeaking), Position: \(newPosition), Current Level: \(state.currentLevel), Sound Volume: \(soundVolume)")
+        print("Speaking: \(isSpeaking), Position: \(state.position), Current Level: \(state.currentLevel), Sound Volume: \(soundVolume)")
     }
     
     private func handleLevelAchieved(_ level: Int) {
@@ -155,18 +157,15 @@ class GameViewModel: ObservableObject {
     private func calculateNewPosition(state: GameState, isSpeaking: Bool) -> CGFloat {
         let targetY: CGFloat
         if isSpeaking {
-            // Движение вверх при громком звуке
-            targetY = state.position - Constants.Move.riseDistance
+            // Увеличиваем позицию при наличии звука
+            targetY = state.position + Constants.Move.riseSpeed * 0.1 // Увеличиваем позицию с использованием riseSpeed
         } else {
-            // Падение при тишине
-            targetY = state.position + Constants.Move.fallSpeed
+            // Уменьшаем позицию при отсутствии звука
+            targetY = state.position - Constants.Move.fallSpeed * 0.1 // Уменьшаем позицию с использованием fallSpeed
         }
         
-        // Ограничиваем только нижнюю границу движения
-        let maxY = state.baseY  // Нижняя граница
-        let minY: CGFloat = 0   // Верхняя граница (верх экрана)
-        
-        return min(max(targetY, minY), maxY)
+        // Убираем ограничение по верхней границе, чтобы космонавт мог подниматься выше
+        return targetY // Возвращаем новое значение позиции
     }
     
     private func updateStars(stars: [Bool], level: Int) -> [Bool] {
