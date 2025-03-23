@@ -27,23 +27,6 @@ class GameViewModel: ObservableObject {
         setupSpeechDetection()
     }
     
-    private func setupSpeechDetection() {
-        Task {
-            let publisher = await speechDetector.isUserSpeakingPublisher
-            
-            publisher
-                .debounce(for: .milliseconds(100), scheduler: DispatchQueue.main)
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] soundVolume in
-                    guard let self = self else { return }
-                    Task { @MainActor in
-                        self.processIntent(.speakingChanged(soundVolume: soundVolume))
-                    }
-                }
-                .store(in: &cancellables)
-        }
-    }
-    
     // Добавляем метод для предварительной подготовки аудио
     private func prepareAudio() {
         guard !isPreparingAudio else { return }
@@ -64,16 +47,20 @@ class GameViewModel: ObservableObject {
         }
     }
     
-    func processIntent(_ intent: GameEvent) {
-        Task { @MainActor in
-            switch intent {
-            case .speakingChanged(let soundVolume):
-                handleSpeakingState(soundVolume)
-            case .levelReached(let level):
-                handleLevelAchieved(level)
-            case .resetGame:
-                resetGame()
-            }
+    private func setupSpeechDetection() {
+        Task {
+            let publisher = await speechDetector.isUserSpeakingPublisher
+            
+            publisher
+                .debounce(for: .milliseconds(100), scheduler: DispatchQueue.main)
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] soundVolume in
+                    guard let self = self else { return }
+                    Task { @MainActor in
+                        self.processEvent(.speakingChanged(soundVolume: soundVolume))
+                    }
+                }
+                .store(in: &cancellables)
         }
     }
     
@@ -97,6 +84,19 @@ class GameViewModel: ObservableObject {
             print("Stopping sound detection")
             await speechDetector.stopRecording()
             state.isDetectingActive = false
+        }
+    }
+    
+    func processEvent(_ intent: GameEvent) {
+        Task { @MainActor in
+            switch intent {
+            case .speakingChanged(let soundVolume):
+                handleSpeakingState(soundVolume)
+            case .levelReached(let level):
+                handleLevelAchieved(level)
+            case .resetGame:
+                resetGame()
+            }
         }
     }
     
@@ -125,7 +125,7 @@ class GameViewModel: ObservableObject {
             state.shouldPlayStarAnimation = true
             
             // Обрабатываем достижение уровня
-            processIntent(.levelReached(level: state.currentLevel))
+            processEvent(.levelReached(level: state.currentLevel))
             
             // Если это последняя звезда, показываем фейерверк
             if state.currentLevel == Constants.Level.y.count - 1 {

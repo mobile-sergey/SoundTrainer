@@ -36,6 +36,7 @@ struct GameView: View {
                 .setContentMode(.scaleAspectFill)
                 .frame(width: 180, height: 180)
                 .offset(x: state.xOffset, y: animatedY)
+            
         }
         .onChange(of: state.position) { newPosition in
             withAnimation(.linear(duration: 0.1)) {
@@ -59,14 +60,15 @@ struct GameView: View {
     private func checkLevelProgress(newY: CGFloat) {
         guard state.currentLevel < Constants.Level.y.count,
               lastLevelCheck != state.currentLevel,
-              newY <= Constants.Level.y[state.currentLevel] else {
+              newY <= Constants.Level.y[state.currentLevel]
+        else {
             return
         }
         
         lastLevelCheck = state.currentLevel
         
         Task { @MainActor in
-            viewModel.processIntent(.levelReached(level: state.currentLevel))
+            viewModel.processEvent(.levelReached(level: state.currentLevel))
         }
     }
 }
