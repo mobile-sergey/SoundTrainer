@@ -13,34 +13,50 @@ struct GameScreen: View {
     @State private var showMicrophoneAlert = false
     let onExit: () -> Void
     
+    @State private var animatedY: CGFloat = 0
+    @State private var lastLevelCheck: Int = 0
+    
     init(onExit: @escaping () -> Void) {
         _viewModel = StateObject(wrappedValue: GameViewModel())
         self.onExit = onExit
     }
     
     var body: some View {
-        ZStack {            
-            GameView(state: viewModel.state, viewModel: viewModel)
-                .animation(.default, value: viewModel.state)
-                .transaction { transaction in
-                    transaction.animation = .default
-                }
+        ZStack {
+            BackgroundView()
             
-            Button(action: {
-                onExit()
-                Task.detached(priority: .userInitiated) {
-                    await MainActor.run {
-                        viewModel.cleanup()
+            // Уровни и звёзды
+            LevelsView(
+                collectedStars: viewModel.state.collectedStars,
+                onStarCollected: { level in
+                    Task { @MainActor in
+                        viewModel.collectStar(level: level)
                     }
                 }
-            }) {
-                Image(systemName: "arrow.backward")
-                    .foregroundColor(.black)
-                    .padding(16)
+            )
+            
+            // Основная анимация космонавта
+            AnimationView(name: Constants.Anim.austronaut)
+                .setLoopMode(.loop)
+                .setContentMode(.scaleAspectFill)
+                .frame(width: 180, height: 180)
+                .offset(x: viewModel.state.xOffset, y: animatedY)
+            
+        }
+        .onChange(of: viewModel.state.position) { newPosition in
+            withAnimation(.linear(duration: 0.1)) {
+                animatedY = newPosition
             }
-            .position(x: 40, y: 40)
+        }
+        .onChange(of: animatedY) { newY in
+            checkLevelProgress(newY: newY)
+        }
+        .animation(.default, value: viewModel.state)
+        .transaction { transaction in
+            transaction.animation = .default
         }
         .onAppear {
+            animatedY = viewModel.state.position
             // Запрашиваем разрешение перед началом записи
             SpeechDetector.requestMicrophonePermission { granted in
                 if granted {
@@ -69,6 +85,27 @@ struct GameScreen: View {
             Task { @MainActor in
                 viewModel.cleanup()
             }
+        }
+    }
+    
+    private func calculateDuration() -> Double {
+        let distance = Constants.Move.riseDistance
+        let speed = viewModel.state.isSpeaking ? Constants.Move.riseSpeed : Constants.Move.fallSpeed
+        return Double(distance) / Double(speed)
+    }
+    
+    private func checkLevelProgress(newY: CGFloat) {
+        guard viewModel.state.currentLevel < Constants.Level.y.count,
+              lastLevelCheck != viewModel.state.currentLevel,
+              newY <= Constants.Level.y[viewModel.state.currentLevel]
+        else {
+            return
+        }
+        
+        lastLevelCheck = viewModel.state.currentLevel
+        
+        Task { @MainActor in
+            viewModel.processEvent(.levelReached(level: viewModel.state.currentLevel))
         }
     }
 }
