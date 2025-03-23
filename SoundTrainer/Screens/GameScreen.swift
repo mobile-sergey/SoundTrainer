@@ -40,7 +40,7 @@ struct GameScreen: View {
                 .setLoopMode(.loop)
                 .setContentMode(.scaleAspectFill)
                 .frame(width: 180, height: 180)
-                .offset(x: viewModel.state.xOffset, y: UIScreen.main.bounds.height - viewModel.state.position)
+                .offset(x: viewModel.state.xOffset, y: UIScreen.main.bounds.height - Constants.Cosmo.yOffset - viewModel.state.position)
             
         }
         .onChange(of: viewModel.state.position) { newPosition in
@@ -104,9 +104,21 @@ struct GameScreen: View {
         
         lastLevelCheck = viewModel.state.currentLevel
         
+        // Запуск анимации фейерверков при достижении уровня
+        launchFireworks(for: viewModel.state.currentLevel)
+        
         Task { @MainActor in
             viewModel.processEvent(.levelReached(level: viewModel.state.currentLevel))
+            // Обновление собранных звёзд
+            viewModel.state.collectedStars = Array(repeating: false, count: Constants.Level.y.count) // Сброс звёзд
+            viewModel.state.collectedStars[viewModel.state.currentLevel] = true // Отметить текущую звезду как собранную
         }
+    }
+    
+    private func launchFireworks(for level: Int) {
+        // Логика запуска анимации фейерверков для соответствующего уровня
+        // Например, можно использовать специальный View для анимации
+        // FireworksView(level: level).show()
     }
 }
 

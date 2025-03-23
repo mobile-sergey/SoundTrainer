@@ -11,7 +11,7 @@ import Combine
 
 @MainActor
 class GameViewModel: ObservableObject {
-    @Published private(set) var state: GameState = .Initial
+    @Published var state: GameState = .Initial
     private let speechDetector: SpeechDetector
     private var cancellables = Set<AnyCancellable>()
     private var isPreparingAudio = false
@@ -20,10 +20,9 @@ class GameViewModel: ObservableObject {
         self.speechDetector = speechDetector
         resetGame()
         
-        // Подготавливаем аудио заранее
+        // Устанавливаем начальное положение ракеты
+        state.position = 0 // Устанавливаем начальное значение position в 0
         prepareAudio()
-        
-        // Настраиваем подписку на publisher в отдельной задаче
         setupSpeechDetection()
     }
     
@@ -116,63 +115,76 @@ class GameViewModel: ObservableObject {
         let isSpeaking: Bool = soundVolume > Constants.Sound.amplitude
         let targetPosition = calculateNewPosition(state: state, isSpeaking: isSpeaking)
         
-        // Обновляем позицию
-        state.position = targetPosition
+        // Создаем новый экземпляр GameState с обновленной позицией
+        var newState = state
+        newState.position = targetPosition
         
         // Проверяем достижение уровня
-        let currentLevelHeight = Constants.Level.y[state.currentLevel] * UIScreen.main.bounds.height // Высота уровня в пикселях
-        if state.position >= currentLevelHeight && !state.collectedStars[state.currentLevel] {
-            print("Достигнут уровень \(state.currentLevel) на высоте \(currentLevelHeight)")
+        let currentLevelHeight = Constants.Level.y[newState.currentLevel] * UIScreen.main.bounds.height // Высота уровня в пикселях
+        if newState.position >= currentLevelHeight && !newState.collectedStars[newState.currentLevel] {
+            print("Достигнут уровень \(newState.currentLevel) на высоте \(currentLevelHeight)")
             
             // Запускаем анимацию сбора звезды
-            state.shouldPlayStarAnimation = true
+            newState.shouldPlayStarAnimation = true
             
             // Обрабатываем достижение уровня
-            processEvent(.levelReached(level: state.currentLevel))
+            processEvent(.levelReached(level: newState.currentLevel))
             
             // Если это последняя звезда, показываем фейерверк
-            if state.currentLevel == Constants.Level.y.count - 1 {
-                state.shouldShowFireworks = true
+            if newState.currentLevel == Constants.Level.y.count - 1 {
+                newState.shouldShowFireworks = true
             }
         }
         
         // Обновляем состояние
-        state.isSpeaking = isSpeaking
+        state = newState // Присваиваем новый экземпляр state
         
         print("Speaking: \(isSpeaking), Position: \(state.position), Current Level: \(state.currentLevel), Sound Volume: \(soundVolume)")
     }
     
     private func handleLevelAchieved(_ level: Int) {
-        guard level < Constants.Level.y.count else { return }
+        var newState = state
+        if level < state.collectedStars.count {
+            newState.currentLevel = level
+            newState.baseY = Constants.Level.y[level]
+            newState.xOffset = Constants.Level.x[level]
+            newState.shouldShowFireworks = true
+            newState.shouldPlayStarAnimation = true
+            collectStar(level: level)
+            state = newState // Присваиваем новый экземпляр state
+        }
         
-        let newStars = updateStars(stars: state.collectedStars, level: level)
-        state.currentLevel = level + 1
-        state.baseY = Constants.Level.y[level]
-        state.xOffset = Constants.Level.x[level]
-        state.collectedStars = newStars
-        
-        print("Level \(level) achieved. Stars: \(newStars)")
+        print("Level \(level) achieved. Stars: \(state.collectedStars)")
     }
     
     private func calculateNewPosition(state: GameState, isSpeaking: Bool) -> CGFloat {
+//        _ = UIScreen.main.bounds.height // Получаем высоту экрана
         let targetY: CGFloat
+        
         if isSpeaking {
             // Увеличиваем позицию при наличии звука
-            targetY = state.position + Constants.Move.riseSpeed * 0.1 // Увеличиваем позицию с использованием riseSpeed
+            targetY = min(state.position + Constants.Move.riseSpeed * 0.1, Constants.Cosmo.yMax) // Уменьшаем верхнюю границу до 850
         } else {
             // Уменьшаем позицию при отсутствии звука
-            targetY = state.position - Constants.Move.fallSpeed * 0.1 // Уменьшаем позицию с использованием fallSpeed
+            targetY = max(state.position - Constants.Move.fallSpeed * 0.1, 0) // Ограничиваем нижнюю границу
         }
         
-        // Убираем ограничение по верхней границе, чтобы космонавт мог подниматься выше
+        // Проверяем, достигли ли мы уровня для звезды
+        if targetY >= Constants.Level.y[0] && state.currentLevel == 0 {
+            processEvent(.levelReached(level: 1))
+        } else if targetY >= Constants.Level.y[1] && state.currentLevel == 1 {
+            processEvent(.levelReached(level: 2))
+        } else if targetY >= Constants.Level.y[2] && state.currentLevel == 2 {
+            processEvent(.levelReached(level: 3))
+        }
+        
         return targetY // Возвращаем новое значение позиции
     }
     
     private func updateStars(stars: [Bool], level: Int) -> [Bool] {
-        let correctedLevel = Constants.Level.y.count - 1 - level
         var newStars = stars
-        if correctedLevel < stars.count {
-            newStars[correctedLevel] = true
+        if level <= stars.count {
+            newStars[level - 1] = true
         }
         return newStars
     }

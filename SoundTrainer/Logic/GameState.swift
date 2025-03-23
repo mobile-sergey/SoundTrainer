@@ -21,10 +21,10 @@ struct GameState: Equatable {
     
     static var Initial: GameState {
         GameState(
-            position: Constants.Cosmo.y,
+            position: 0,
             currentLevel: 0,
             xOffset: -150,
-            baseY: Constants.Cosmo.y,
+            baseY: 0,
             isSpeaking: false,
             isDetectingActive: false,
             collectedStars: Array(repeating: false, count: Constants.Level.y.count),
