@@ -21,7 +21,10 @@ class GameViewModel: ObservableObject {
         resetGame()
         
         // Устанавливаем начальное положение ракеты
-        state.position = 0 // Устанавливаем начальное значение position в 0
+        state.position = 0
+        // Смещаем ракету влево на половину ширины экрана и вправо на половину ширины уровня
+        let screenWidth = UIScreen.main.bounds.width
+        state.xOffset = -screenWidth/2 + Constants.Level.width * screenWidth/2
         prepareAudio()
         setupSpeechDetection()
     }
@@ -119,66 +122,68 @@ class GameViewModel: ObservableObject {
         var newState = state
         newState.position = targetPosition
         
-        // Проверяем достижение уровня
-        let currentLevelHeight = Constants.Level.y[newState.currentLevel] * UIScreen.main.bounds.height // Высота уровня в пикселях
-        if newState.position >= currentLevelHeight && !newState.collectedStars[newState.currentLevel] {
-            print("Достигнут уровень \(newState.currentLevel) на высоте \(currentLevelHeight)")
-            
-            // Запускаем анимацию сбора звезды
-            newState.shouldPlayStarAnimation = true
-            
-            // Обрабатываем достижение уровня
-            processEvent(.levelReached(level: newState.currentLevel))
-            
-            // Если это последняя звезда, показываем фейерверк
-            if newState.currentLevel == Constants.Level.y.count - 1 {
-                newState.shouldShowFireworks = true
-            }
-        }
-        
         // Обновляем состояние
-        state = newState // Присваиваем новый экземпляр state
+        state = newState
         
         print("Speaking: \(isSpeaking), Position: \(state.position), Current Level: \(state.currentLevel), Sound Volume: \(soundVolume)")
     }
     
-    private func handleLevelAchieved(_ level: Int) {
-        var newState = state
-        if level < state.collectedStars.count {
-            newState.currentLevel = level
-            newState.baseY = Constants.Level.y[level]
-            newState.xOffset = Constants.Level.x[level]
-            newState.shouldShowFireworks = true
-            newState.shouldPlayStarAnimation = true
-            collectStar(level: level)
-            state = newState // Присваиваем новый экземпляр state
-        }
-        
-        print("Level \(level) achieved. Stars: \(state.collectedStars)")
-    }
-    
     private func calculateNewPosition(state: GameState, isSpeaking: Bool) -> CGFloat {
-//        _ = UIScreen.main.bounds.height // Получаем высоту экрана
         let targetY: CGFloat
         
         if isSpeaking {
             // Увеличиваем позицию при наличии звука
-            targetY = min(state.position + Constants.Move.riseSpeed * 0.1, Constants.Cosmo.yMax) // Уменьшаем верхнюю границу до 850
+            targetY = min(state.position + Constants.Move.riseSpeed * 0.1, Constants.Cosmo.yMax)
         } else {
             // Уменьшаем позицию при отсутствии звука
-            targetY = max(state.position - Constants.Move.fallSpeed * 0.1, 0) // Ограничиваем нижнюю границу
+            targetY = max(state.position - Constants.Move.fallSpeed * 0.1, 0)
         }
         
-        // Проверяем, достигли ли мы уровня для звезды
+        // Проверяем достижение уровней
         if targetY >= Constants.Level.y[0] && state.currentLevel == 0 {
-            processEvent(.levelReached(level: 1))
+            print("Достигнута высота для уровня 1: \(targetY)")
+            processEvent(.levelReached(level: 0))
         } else if targetY >= Constants.Level.y[1] && state.currentLevel == 1 {
-            processEvent(.levelReached(level: 2))
+            print("Достигнута высота для уровня 2: \(targetY)")
+            processEvent(.levelReached(level: 1))
         } else if targetY >= Constants.Level.y[2] && state.currentLevel == 2 {
-            processEvent(.levelReached(level: 3))
+            print("Достигнута высота для уровня 3: \(targetY)")
+            processEvent(.levelReached(level: 2))
         }
         
-        return targetY // Возвращаем новое значение позиции
+        return targetY
+    }
+    
+    private func handleLevelAchieved(_ level: Int) {
+        print("Обработка достижения уровня: \(level)")
+        var newState = state
+        if level < state.collectedStars.count {
+            // Отмечаем только текущую звезду как собранную
+            var newStars = Array(repeating: false, count: Constants.Level.y.count) // Сбрасываем все звезды
+            // Заполняем true все предыдущие звезды и текущую
+            for i in 0...level {
+                newStars[i] = true
+            }
+            newState.collectedStars = newStars
+            
+            // Увеличиваем текущий уровень
+            newState.currentLevel = level + 1
+            newState.baseY = Constants.Level.y[level]
+            
+            // Смещаем ракету вправо на ширину уровня
+            let screenWidth = UIScreen.main.bounds.width
+            newState.xOffset = -screenWidth/2 + Constants.Level.width * screenWidth * (CGFloat(level + 1) + 0.5)
+            
+            // Запускаем анимацию фейерверка только для последнего уровня
+            if level == Constants.Level.y.count - 1 {
+                newState.shouldShowFireworks = true
+            }
+            
+            newState.shouldPlayStarAnimation = true
+            
+            state = newState
+            print("Level \(level) achieved. Stars: \(newState.collectedStars), Next level: \(state.currentLevel)")
+        }
     }
     
     private func updateStars(stars: [Bool], level: Int) -> [Bool] {
@@ -191,6 +196,11 @@ class GameViewModel: ObservableObject {
     
     private func resetGame() {
         state = .Initial
+        state.currentLevel = 0
+        state.position = 0
+        // Начальное положение - смещение влево на половину экрана и вправо на половину ширины уровня
+        let screenWidth = UIScreen.main.bounds.width
+        state.xOffset = -screenWidth/2 + Constants.Level.width * screenWidth/2
         state.collectedStars = Array(repeating: false, count: Constants.Level.y.count)
         print("Game state reset")
     }

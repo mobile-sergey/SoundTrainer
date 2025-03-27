@@ -34,7 +34,7 @@ enum Constants {
 
     // MARK: - Звук
     enum Sound {
-        static let amplitude: Float = 10  // Порог громкости для подъема
+        static let amplitude: Float = 5  // Порог громкости для подъема
         static let сheckInterval: TimeInterval = 0.1  // Интервал проверки звука (100 мс)
     }
 

@@ -44,6 +44,13 @@ struct GameScreen: View {
                     y: UIScreen.main.bounds.height - Constants.Cosmo.yOffset
                         - viewModel.state.position)
 
+            // Анимация фейерверка на весь экран
+            if viewModel.state.shouldShowFireworks {
+                AnimationView(name: Constants.Anim.fireworks)
+                    .setLoopMode(.loop)
+                    .setContentMode(.scaleAspectFill)
+                    .edgesIgnoringSafeArea(.all)
+            }
         }
         .onChange(of: viewModel.state.position) { newPosition in
             withAnimation(.linear(duration: 0.1)) {
@@ -106,23 +113,43 @@ struct GameScreen: View {
         guard viewModel.state.currentLevel < Constants.Level.y.count,
             lastLevelCheck != viewModel.state.currentLevel,
             newY >= Constants.Level.y[viewModel.state.currentLevel]
-                * UIScreen.main.bounds.height
         else {
             return
         }
 
         lastLevelCheck = viewModel.state.currentLevel
+        let currentLevel = viewModel.state.currentLevel
 
-        // Запуск анимации фейерверков при достижении уровня
-        launchFireworks(for: viewModel.state.currentLevel)
+        // Анимация перехода на новый уровень
+        withAnimation(.easeInOut(duration: 0.5)) {
+            // Анимация перемещения космонавта к звезде текущего уровня
+            viewModel.state.position = Constants.Level.y[currentLevel]
+            viewModel.state.xOffset = Constants.Level.x[currentLevel]
+        }
+        
+        // Запускаем анимацию фейерверка для достигнутого уровня
+        let fireworksAnimation = AnimationView(name: Constants.Anim.fireworks)
+            .setLoopMode(.playOnce)
+            .setContentMode(.scaleAspectFill)
+            .setSpeed(1.0)
+            .setPlaying(true)
+        
+        // Позиционируем фейерверк на уровне достигнутой звезды
+        fireworksAnimation
+            .frame(width: 100, height: 100)
+            .offset(
+                x: Constants.Level.x[currentLevel],
+                y: UIScreen.main.bounds.height - Constants.Cosmo.yOffset - Constants.Level.y[currentLevel]
+            )
 
         Task { @MainActor in
-            viewModel.processEvent(
-                .levelReached(level: viewModel.state.currentLevel))
-            // Обновление собранных звёзд
-            viewModel.state.collectedStars = Array(
-                repeating: false, count: Constants.Level.y.count)  // Сброс звёзд
-            viewModel.state.collectedStars[viewModel.state.currentLevel] = true  // Отметить текущую звезду как собранную
+            viewModel.processEvent(.levelReached(level: currentLevel))
+            
+            // Если достигнут последний уровень, можно добавить дополнительную логику
+            if currentLevel == Constants.Level.y.count - 1 {
+                // Например, показать поздравление или запустить особую анимацию
+                viewModel.state.shouldShowFireworks = true
+            }
         }
     }
 

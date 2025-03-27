@@ -13,12 +13,32 @@ struct LevelsView: View {
 
     // Состояния для анимации
     @State private var starPositions: [Int: CGPoint] = [:]
+    @State private var initialAnimationCompleted: Bool = false
+    @State private var animatingStarIndex: Int? = nil
 
     var body: some View {
         GeometryReader { geometry in
             ZStack {
                 drawLevels(geometry)
                 drawStars()
+            }
+        }
+        .onAppear {
+            print("🌟 LevelsView появился. Начальное состояние звёзд:", collectedStars)
+            // Отключаем начальную анимацию через 1 секунду
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                initialAnimationCompleted = true
+            }
+        }
+        .onChange(of: collectedStars) { newStars in
+            print("🔄 Изменение состояния collectedStars:", newStars)
+            if let newStarIndex = newStars.enumerated().first(where: { $0.element && !collectedStars[$0.offset] })?.offset {
+                print("⭐️ Запуск анимации сбора для звезды \(newStarIndex)")
+                animatingStarIndex = newStarIndex
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    print("🏁 Завершение анимации сбора для звезды \(newStarIndex)")
+                    animatingStarIndex = nil
+                }
             }
         }
     }
@@ -65,16 +85,43 @@ struct LevelsView: View {
     }
 
     private func drawStars() -> some View {
-
         return ZStack {
             ForEach(Array(starPositions.keys.sorted()), id: \.self) { index in
                 if let position = starPositions[index] {
-                    StarView(
-                        position: position,
-                        isCollected: false,
-                        // collectedStars.indices.contains(index) ? collectedStars[index] : false,
-                        onCollect: { onStarCollected(index) }
-                    )
+                    Group {
+                        if !initialAnimationCompleted {
+                            // Начальная анимация появления для всех звёзд
+                            AnimationView(name: Constants.Anim.star)
+                                .setLoopMode(.playOnce)
+                                .setContentMode(.scaleAspectFill)
+                                .frame(width: 100, height: 100)
+                                .position(position)
+                                .onAppear {
+                                    print("🎬 Звезда \(index): Начальная анимация появления")
+                                }
+                        } else if !collectedStars[index] {
+                            // Показываем статичную звезду если она не собрана
+                            Image(systemName: "star.fill") // или ваша статичная звезда
+                                .foregroundColor(.yellow)
+                                .font(.system(size: 54))
+                                .position(position)
+                                .onAppear {
+                                    print("⭐️ Звезда \(index): Показ статичной звезды")
+                                }
+                            
+                            // Показываем анимацию фейерверка при сборе
+                            if animatingStarIndex == index {
+                                AnimationView(name: Constants.Anim.fireworks)
+                                    .setLoopMode(.playOnce)
+                                    .setContentMode(.scaleAspectFill)
+                                    .frame(width: 100, height: 100)
+                                    .position(position)
+                                    .onAppear {
+                                        print("🎆 Звезда \(index): Анимация фейерверка")
+                                    }
+                            }
+                        }
+                    }
                 }
             }
         }
