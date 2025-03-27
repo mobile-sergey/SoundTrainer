@@ -7,58 +7,58 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A5880E762D8D45BC003CBD62 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = A5880E752D8D45BC003CBD62 /* Lottie */; };
+		A51FD3122D969BF700E74443 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = A51FD3112D969BF700E74443 /* Lottie */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		A5F5657F2D8D44F1002B4946 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		A5192B612D8C206B00D5B903 /* Voice to stars.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Voice to stars.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A51FD2D22D969AEB00E74443 /* VoiceToStarts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VoiceToStarts.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A51FD31B2D96B16800E74443 /* Exceptions for "VoiceToStarts" folder in "VoiceToStarts" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A51FD2D12D969AEB00E74443 /* VoiceToStarts */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		A5192B632D8C206B00D5B903 /* SoundTrainer */ = {
+		A51FD2D42D969AEB00E74443 /* VoiceToStarts */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = SoundTrainer;
+			exceptions = (
+				A51FD31B2D96B16800E74443 /* Exceptions for "VoiceToStarts" folder in "VoiceToStarts" target */,
+			);
+			path = VoiceToStarts;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		A5192B5E2D8C206B00D5B903 /* Frameworks */ = {
+		A51FD2CF2D969AEB00E74443 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A5880E762D8D45BC003CBD62 /* Lottie in Frameworks */,
+				A51FD3122D969BF700E74443 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		A5192B582D8C206B00D5B903 = {
+		A51FD2C92D969AEB00E74443 = {
 			isa = PBXGroup;
 			children = (
-				A5192B632D8C206B00D5B903 /* SoundTrainer */,
-				A5192B622D8C206B00D5B903 /* Products */,
+				A51FD2D42D969AEB00E74443 /* VoiceToStarts */,
+				A51FD2D32D969AEB00E74443 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		A5192B622D8C206B00D5B903 /* Products */ = {
+		A51FD2D32D969AEB00E74443 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A5192B612D8C206B00D5B903 /* Voice to stars.app */,
+				A51FD2D22D969AEB00E74443 /* VoiceToStarts.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -66,69 +66,68 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A5192B602D8C206B00D5B903 /* SoundTrainer */ = {
+		A51FD2D12D969AEB00E74443 /* VoiceToStarts */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A5192B6F2D8C206C00D5B903 /* Build configuration list for PBXNativeTarget "SoundTrainer" */;
+			buildConfigurationList = A51FD2E02D969AEC00E74443 /* Build configuration list for PBXNativeTarget "VoiceToStarts" */;
 			buildPhases = (
-				A5192B5D2D8C206B00D5B903 /* Sources */,
-				A5192B5E2D8C206B00D5B903 /* Frameworks */,
-				A5192B5F2D8C206B00D5B903 /* Resources */,
-				A5F5657F2D8D44F1002B4946 /* Embed Frameworks */,
+				A51FD2CE2D969AEB00E74443 /* Sources */,
+				A51FD2CF2D969AEB00E74443 /* Frameworks */,
+				A51FD2D02D969AEB00E74443 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				A5192B632D8C206B00D5B903 /* SoundTrainer */,
+				A51FD2D42D969AEB00E74443 /* VoiceToStarts */,
 			);
-			name = SoundTrainer;
+			name = VoiceToStarts;
 			packageProductDependencies = (
-				A5880E752D8D45BC003CBD62 /* Lottie */,
+				A51FD3112D969BF700E74443 /* Lottie */,
 			);
-			productName = SoundTrainer;
-			productReference = A5192B612D8C206B00D5B903 /* Voice to stars.app */;
+			productName = VoiceToStarts;
+			productReference = A51FD2D22D969AEB00E74443 /* VoiceToStarts.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		A5192B592D8C206B00D5B903 /* Project object */ = {
+		A51FD2CA2D969AEB00E74443 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1610;
 				LastUpgradeCheck = 1610;
 				TargetAttributes = {
-					A5192B602D8C206B00D5B903 = {
+					A51FD2D12D969AEB00E74443 = {
 						CreatedOnToolsVersion = 16.1;
 					};
 				};
 			};
-			buildConfigurationList = A5192B5C2D8C206B00D5B903 /* Build configuration list for PBXProject "SoundTrainer" */;
+			buildConfigurationList = A51FD2CD2D969AEB00E74443 /* Build configuration list for PBXProject "VoiceToStarts" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = A5192B582D8C206B00D5B903;
+			mainGroup = A51FD2C92D969AEB00E74443;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				A5880E742D8D45BC003CBD62 /* XCRemoteSwiftPackageReference "lottie-ios" */,
+				A51FD3102D969BF700E74443 /* XCRemoteSwiftPackageReference "lottie-spm" */,
 			);
 			preferredProjectObjectVersion = 77;
-			productRefGroup = A5192B622D8C206B00D5B903 /* Products */;
+			productRefGroup = A51FD2D32D969AEB00E74443 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A5192B602D8C206B00D5B903 /* SoundTrainer */,
+				A51FD2D12D969AEB00E74443 /* VoiceToStarts */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		A5192B5F2D8C206B00D5B903 /* Resources */ = {
+		A51FD2D02D969AEB00E74443 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -138,7 +137,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		A5192B5D2D8C206B00D5B903 /* Sources */ = {
+		A51FD2CE2D969AEB00E74443 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -148,7 +147,7 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		A5192B6D2D8C206C00D5B903 /* Debug */ = {
+		A51FD2DE2D969AEC00E74443 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -200,7 +199,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				INFOPLIST_FILE = VoiceToStarts/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -211,7 +211,7 @@
 			};
 			name = Debug;
 		};
-		A5192B6E2D8C206C00D5B903 /* Release */ = {
+		A51FD2DF2D969AEC00E74443 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -257,7 +257,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				INFOPLIST_FILE = VoiceToStarts/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -267,72 +268,60 @@
 			};
 			name = Release;
 		};
-		A5192B702D8C206C00D5B903 /* Debug */ = {
+		A51FD2E12D969AEC00E74443 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"SoundTrainer/App\"";
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_ASSET_PATHS = "\"VoiceToStarts/Animations\"";
 				DEVELOPMENT_TEAM = 5HDD9A94JL;
 				ENABLE_PREVIEWS = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/SoundTrainer",
-				);
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = VoiceToStarts/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Voice to stars";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "\"Необходим доступ к микрофону для определения речи в игре\"";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.kids-games";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ru.school21.SoundTrainer;
-				PRODUCT_NAME = "Voice to stars";
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = ru.voicetostars.VoiceToStarts;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
-		A5192B712D8C206C00D5B903 /* Release */ = {
+		A51FD2E22D969AEC00E74443 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"SoundTrainer/App\"";
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_ASSET_PATHS = "\"VoiceToStarts/Animations\"";
 				DEVELOPMENT_TEAM = 5HDD9A94JL;
 				ENABLE_PREVIEWS = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/SoundTrainer",
-				);
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = VoiceToStarts/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Voice to stars";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "\"Необходим доступ к микрофону для определения речи в игре\"";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.kids-games";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ru.school21.SoundTrainer;
-				PRODUCT_NAME = "Voice to stars";
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = ru.voicetostars.VoiceToStarts;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -342,20 +331,20 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A5192B5C2D8C206B00D5B903 /* Build configuration list for PBXProject "SoundTrainer" */ = {
+		A51FD2CD2D969AEB00E74443 /* Build configuration list for PBXProject "VoiceToStarts" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A5192B6D2D8C206C00D5B903 /* Debug */,
-				A5192B6E2D8C206C00D5B903 /* Release */,
+				A51FD2DE2D969AEC00E74443 /* Debug */,
+				A51FD2DF2D969AEC00E74443 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A5192B6F2D8C206C00D5B903 /* Build configuration list for PBXNativeTarget "SoundTrainer" */ = {
+		A51FD2E02D969AEC00E74443 /* Build configuration list for PBXNativeTarget "VoiceToStarts" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A5192B702D8C206C00D5B903 /* Debug */,
-				A5192B712D8C206C00D5B903 /* Release */,
+				A51FD2E12D969AEC00E74443 /* Debug */,
+				A51FD2E22D969AEC00E74443 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -363,9 +352,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		A5880E742D8D45BC003CBD62 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
+		A51FD3102D969BF700E74443 /* XCRemoteSwiftPackageReference "lottie-spm" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/airbnb/lottie-ios.git";
+			repositoryURL = "https://github.com/airbnb/lottie-spm.git";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 4.5.1;
@@ -374,12 +363,12 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		A5880E752D8D45BC003CBD62 /* Lottie */ = {
+		A51FD3112D969BF700E74443 /* Lottie */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = A5880E742D8D45BC003CBD62 /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			package = A51FD3102D969BF700E74443 /* XCRemoteSwiftPackageReference "lottie-spm" */;
 			productName = Lottie;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
-	rootObject = A5192B592D8C206B00D5B903 /* Project object */;
+	rootObject = A51FD2CA2D969AEB00E74443 /* Project object */;
 }

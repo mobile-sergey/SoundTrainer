@@ -5,6 +5,7 @@
 //  Created by Sergey on 21.03.2025.
 //
 
+import CoreAudioTypes
 import AVFoundation
 import Lottie
 import SwiftUI
@@ -33,7 +34,7 @@ struct StartScreen: View {
 
             VStack(spacing: 24) {
                 Text("Voice to stars")
-                    .foregroundColor(.active)
+                    .foregroundColor(Color("ActiveColor"))
                     .font(.title)
                     .fontWeight(.bold)
 
@@ -76,7 +77,7 @@ struct StartScreen: View {
                     Text("Начать игру")
                         .font(.title2)
                         .frame(width: 200, height: 50)
-                        .background(.active)
+                        .background(Color("ActiveColor"))
                         .cornerRadius(50)
                 }
 
