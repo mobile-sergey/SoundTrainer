@@ -119,28 +119,14 @@ struct GameScreen: View {
 
         lastLevelCheck = viewModel.state.currentLevel
         let currentLevel = viewModel.state.currentLevel
-
+        let screenWidth = UIScreen.main.bounds.width
+        
         // Анимация перехода на новый уровень
         withAnimation(.easeInOut(duration: 0.5)) {
             // Анимация перемещения космонавта к звезде текущего уровня
             viewModel.state.position = Constants.Level.y[currentLevel]
-            viewModel.state.xOffset = Constants.Level.x[currentLevel]
+            viewModel.state.xOffset = -screenWidth/2 + Constants.Level.width * screenWidth/2
         }
-        
-        // Запускаем анимацию фейерверка для достигнутого уровня
-        let fireworksAnimation = AnimationView(name: Constants.Anim.fireworks)
-            .setLoopMode(.playOnce)
-            .setContentMode(.scaleAspectFill)
-            .setSpeed(1.0)
-            .setPlaying(true)
-        
-        // Позиционируем фейерверк на уровне достигнутой звезды
-        fireworksAnimation
-            .frame(width: 100, height: 100)
-            .offset(
-                x: Constants.Level.x[currentLevel],
-                y: UIScreen.main.bounds.height - Constants.Cosmo.yOffset - Constants.Level.y[currentLevel]
-            )
 
         Task { @MainActor in
             viewModel.processEvent(.levelReached(level: currentLevel))

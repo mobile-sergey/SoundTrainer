@@ -49,7 +49,7 @@ struct LevelsView: View {
         return ZStack {
             ForEach(0..<3) { index in
                 let height =
-                    geometry.size.height * Constants.Level.heights[index]
+                geometry.size.height * Constants.Level.heights[index]
                 let currentX =
                     geometry.size.width - stairWidth * 2.5
                     + (CGFloat(index) * stairWidth)
