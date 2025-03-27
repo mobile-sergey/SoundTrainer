@@ -99,26 +99,31 @@ struct LevelsView: View {
                                 .onAppear {
                                     print("🎬 Звезда \(index): Начальная анимация появления")
                                 }
-                        } else if !collectedStars[index] {
-                            // Показываем статичную звезду если она не собрана
-                            Image("Star") // или ваша статичная звезда
-                                .resizable()
-                                .frame(width: 100, height: 100)
-                                .position(position)
-                                .onAppear {
-                                    print("⭐️ Звезда \(index): Показ статичной звезды")
+                        } else if !collectedStars[index] || animatingStarIndex == index {
+                            // Показываем либо статичную звезду, либо анимацию фейерверка
+                            ZStack {
+                                // Статичная звезда
+                                if !collectedStars[index] {
+                                    Image("Star")
+                                        .resizable()
+                                        .frame(width: 100, height: 100)
+                                        .position(position)
+                                        .onAppear {
+                                            print("⭐️ Звезда \(index): Показ статичной звезды")
+                                        }
                                 }
-                            
-                            // Показываем анимацию фейерверка при сборе
-                            if animatingStarIndex == index {
-                                AnimationView(name: Constants.Anim.fireworks)
-                                    .setLoopMode(.playOnce)
-                                    .setContentMode(.scaleAspectFill)
-                                    .frame(width: 100, height: 100)
-                                    .position(position)
-                                    .onAppear {
-                                        print("🎆 Звезда \(index): Анимация фейерверка")
-                                    }
+                                
+                                // Анимация фейерверка при сборе
+                                if animatingStarIndex == index {
+                                    AnimationView(name: Constants.Anim.fireworks)
+                                        .setLoopMode(.playOnce)
+                                        .setContentMode(.scaleAspectFill)
+                                        .frame(width: 100, height: 100)
+                                        .position(position)
+                                        .onAppear {
+                                            print("🎆 Звезда \(index): Анимация фейерверка")
+                                        }
+                                }
                             }
                         }
                     }
