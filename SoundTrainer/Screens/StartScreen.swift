@@ -30,58 +30,60 @@ struct StartScreen: View {
     
     private var mainContent: some View {
         ZStack {
-            Color.white.edgesIgnoringSafeArea(.all)
+            StarsFallingBackgroundView() // Фон со звёздами
             
             VStack(spacing: 24) {
-                Text("Шарик-Голосовичок")
+                Text("VoiceToStars")
+                    .foregroundColor(.accentColor)
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundColor(.blue)
                 
-                // Анимация с переходом между ракетой и космонавтом
-                ZStack {
-                    if !isRocketAnimationComplete {
-                        AnimationView(name: Constants.Anim.rocket)
-                            .setLoopMode(.playOnce)
-                            .setContentMode(.scaleAspectFill)
-                            .setSpeed(1.0)
-                            .setPlaying(true)
-                            .onAnimationComplete { // Добавляем обработчик завершения анимации
-                                withAnimation(.easeOut(duration: 0.3)) {
-                                    isRocketAnimationComplete = true
-                                }
+                // Анимация ракеты (1 раз)
+                let rocketAnimation = AnimationView(name: Constants.Anim.rocket)
+                    .setLoopMode(.playOnce)
+                    .setContentMode(.scaleAspectFill)
+                    .setSpeed(1.5)
+                    .setPlaying(!isRocketAnimationComplete)
+                
+                // Анимация космонавта (бесконечно)
+                let astronautAnimation = AnimationView(name: Constants.Anim.austronaut)
+                    .setLoopMode(.loop)
+                    .setContentMode(.scaleAspectFill)
+                    .setSpeed(1.0)
+                    .setPlaying(isRocketAnimationComplete)
+                
+                // Отслеживаем завершение анимации ракеты
+                if !isRocketAnimationComplete {
+                    rocketAnimation
+                        .onAnimationComplete {
+                            withAnimation(.easeOut(duration: 0.3)) {
+                                isRocketAnimationComplete = true
                             }
-                            .frame(width: 250, height: 250)
-                            .clipShape(Circle())
-                    }
-                    
-                    if isRocketAnimationComplete {
-                        AnimationView(name: Constants.Anim.austronaut)
-                            .setLoopMode(.loop)
-                            .setContentMode(.scaleAspectFill)
-                            .setSpeed(1.0)
-                            .setPlaying(true)
-                            .frame(width: 250, height: 250)
-                            .transition(.opacity.animation(.easeIn(duration: 0.5)))
-                    }
+                        }
+                        .frame(width: 250, height: 250)
+                        .clipShape(Circle())
+                } else {
+                    astronautAnimation
+                        .frame(width: 250, height: 250)
+                        .transition(.opacity.animation(.easeIn(duration: 0.5)))
                 }
-                .frame(width: 250, height: 250)
                 
                 Button(action: {
                     os_log("Start button clicked", log: .default, type: .debug)
                     checkMicrophonePermission()
                 }) {
                     Text("Начать игру")
-                        .font(.title3)
+                        .font(.title2)
                         .foregroundColor(.white)
                         .frame(width: 200, height: 50)
-                        .background(Color.blue)
-                        .cornerRadius(10)
+                        .background(.accent)
+                        .cornerRadius(50)
                 }
                 
                 Text("Говорите в микрофон, чтобы поднять шарик!")
                     .font(.body)
-                    .foregroundColor(.gray.opacity(0.8))
+                    .foregroundColor(.white)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
             }
