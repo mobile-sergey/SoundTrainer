@@ -5,17 +5,16 @@
 //  Created by Sergey on 21.03.2025.
 //
 
-
-import SwiftUI
-import Lottie
 import AVFoundation
+import Lottie
+import SwiftUI
 import os.log
 
 struct StartScreen: View {
     @State private var isGameScreenPresented = false
     @State private var showPermissionDialog = false
     @State private var isRocketAnimationComplete = false
-    
+
     var body: some View {
         if #available(iOS 16, *) {
             NavigationStack {
@@ -27,32 +26,33 @@ struct StartScreen: View {
             }
         }
     }
-    
+
     private var mainContent: some View {
         ZStack {
-            StarsFallingBackgroundView() // Фон со звёздами
-            
+            StarsFallingBackgroundView()  // Фон со звёздами
+
             VStack(spacing: 24) {
-                Text("VoiceToStars")
-                    .foregroundColor(.accentColor)
+                Text("Voice to stars")
+                    .foregroundColor(.active)
                     .font(.title)
                     .fontWeight(.bold)
-                    .foregroundColor(.blue)
-                
+
                 // Анимация ракеты (1 раз)
                 let rocketAnimation = AnimationView(name: Constants.Anim.rocket)
                     .setLoopMode(.playOnce)
                     .setContentMode(.scaleAspectFill)
                     .setSpeed(1.5)
                     .setPlaying(!isRocketAnimationComplete)
-                
+
                 // Анимация космонавта (бесконечно)
-                let astronautAnimation = AnimationView(name: Constants.Anim.austronaut)
-                    .setLoopMode(.loop)
-                    .setContentMode(.scaleAspectFill)
-                    .setSpeed(1.0)
-                    .setPlaying(isRocketAnimationComplete)
-                
+                let astronautAnimation = AnimationView(
+                    name: Constants.Anim.austronaut
+                )
+                .setLoopMode(.loop)
+                .setContentMode(.scaleAspectFill)
+                .setSpeed(1.0)
+                .setPlaying(isRocketAnimationComplete)
+
                 // Отслеживаем завершение анимации ракеты
                 if !isRocketAnimationComplete {
                     rocketAnimation
@@ -68,19 +68,18 @@ struct StartScreen: View {
                         .frame(width: 250, height: 250)
                         .transition(.opacity.animation(.easeIn(duration: 0.5)))
                 }
-                
+
                 Button(action: {
                     os_log("Start button clicked", log: .default, type: .debug)
                     checkMicrophonePermission()
                 }) {
                     Text("Начать игру")
                         .font(.title2)
-                        .foregroundColor(.white)
                         .frame(width: 200, height: 50)
-                        .background(.accent)
+                        .background(.active)
                         .cornerRadius(50)
                 }
-                
+
                 Text("Говорите в микрофон, чтобы поднять шарик!")
                     .font(.body)
                     .foregroundColor(.white)
@@ -94,7 +93,7 @@ struct StartScreen: View {
                     if #available(iOS 16, *) {
                         NavigationLink(
                             destination: GameScreen(onExit: {
-                                isRocketAnimationComplete = false // Сбрасываем состояние анимации при выходе
+                                isRocketAnimationComplete = false  // Сбрасываем состояние анимации при выходе
                             }),
                             isActive: $isGameScreenPresented,
                             label: { EmptyView() }
@@ -103,7 +102,7 @@ struct StartScreen: View {
                         NavigationLink(
                             "",
                             destination: GameScreen(onExit: {
-                                isRocketAnimationComplete = false // Сбрасываем состояние анимации при выходе
+                                isRocketAnimationComplete = false  // Сбрасываем состояние анимации при выходе
                             }),
                             isActive: $isGameScreenPresented
                         )
@@ -116,11 +115,12 @@ struct StartScreen: View {
                 }
                 Button("Отмена", role: .cancel) {}
             } message: {
-                Text("Для игры необходимо разрешение на использование микрофона")
+                Text(
+                    "Для игры необходимо разрешение на использование микрофона")
             }
         }
     }
-    
+
     private func checkMicrophonePermission() {
         os_log("Checking microphone permission", log: .default, type: .debug)
         switch AVAudioSession.sharedInstance().recordPermission {
@@ -135,10 +135,13 @@ struct StartScreen: View {
             AVAudioSession.sharedInstance().requestRecordPermission { granted in
                 DispatchQueue.main.async {
                     if granted {
-                        os_log("Permission granted", log: .default, type: .debug)
+                        os_log(
+                            "Permission granted", log: .default, type: .debug)
                         isGameScreenPresented = true
                     } else {
-                        os_log("Permission denied after request", log: .default, type: .debug)
+                        os_log(
+                            "Permission denied after request", log: .default,
+                            type: .debug)
                         showPermissionDialog = true
                     }
                 }
@@ -147,7 +150,7 @@ struct StartScreen: View {
             break
         }
     }
-    
+
     private func openSettings() {
         if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
             UIApplication.shared.open(settingsUrl)

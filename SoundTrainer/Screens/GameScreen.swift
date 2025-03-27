@@ -5,26 +5,25 @@
 //  Created by Sergey on 21.03.2025.
 //
 
-
 import SwiftUI
 
 struct GameScreen: View {
     @StateObject private var viewModel: GameViewModel
     @State private var showMicrophoneAlert = false
     let onExit: () -> Void
-    
+
     @State private var animatedY: CGFloat = 0
     @State private var lastLevelCheck: Int = 0
-    
+
     init(onExit: @escaping () -> Void) {
         _viewModel = StateObject(wrappedValue: GameViewModel())
         self.onExit = onExit
     }
-    
+
     var body: some View {
         ZStack {
-            BackgroundView()
-            
+            BackgroundView().modifier(StarTwinkleModifier())
+
             // Уровни и звёзды
             LevelsView(
                 collectedStars: viewModel.state.collectedStars,
@@ -34,14 +33,17 @@ struct GameScreen: View {
                     }
                 }
             )
-            
+
             // Основная анимация космонавта
             AnimationView(name: Constants.Anim.austronaut)
                 .setLoopMode(.loop)
                 .setContentMode(.scaleAspectFill)
                 .frame(width: 180, height: 180)
-                .offset(x: viewModel.state.xOffset, y: UIScreen.main.bounds.height - Constants.Cosmo.yOffset - viewModel.state.position)
-            
+                .offset(
+                    x: viewModel.state.xOffset,
+                    y: UIScreen.main.bounds.height - Constants.Cosmo.yOffset
+                        - viewModel.state.position)
+
         }
         .onChange(of: viewModel.state.position) { newPosition in
             withAnimation(.linear(duration: 0.1)) {
@@ -68,7 +70,9 @@ struct GameScreen: View {
                 }
             }
         }
-        .alert("Требуется доступ к микрофону", isPresented: $showMicrophoneAlert) {
+        .alert(
+            "Требуется доступ к микрофону", isPresented: $showMicrophoneAlert
+        ) {
             Button("Открыть настройки") {
                 if let url = URL(string: UIApplication.openSettingsURLString) {
                     UIApplication.shared.open(url)
@@ -79,7 +83,9 @@ struct GameScreen: View {
                 onExit()
             }
         } message: {
-            Text("Для работы приложения необходим доступ к микрофону. Пожалуйста, предоставьте разрешение в настройках.")
+            Text(
+                "Для работы приложения необходим доступ к микрофону. Пожалуйста, предоставьте разрешение в настройках."
+            )
         }
         .onDisappear {
             Task { @MainActor in
@@ -87,38 +93,43 @@ struct GameScreen: View {
             }
         }
     }
-    
+
     private func calculateDuration() -> Double {
         let distance = Constants.Move.riseDistance
-        let speed = viewModel.state.isSpeaking ? Constants.Move.riseSpeed : Constants.Move.fallSpeed
+        let speed =
+            viewModel.state.isSpeaking
+            ? Constants.Move.riseSpeed : Constants.Move.fallSpeed
         return Double(distance) / Double(speed)
     }
-    
+
     private func checkLevelProgress(newY: CGFloat) {
         guard viewModel.state.currentLevel < Constants.Level.y.count,
-              lastLevelCheck != viewModel.state.currentLevel,
-              newY >= Constants.Level.y[viewModel.state.currentLevel] * UIScreen.main.bounds.height
+            lastLevelCheck != viewModel.state.currentLevel,
+            newY >= Constants.Level.y[viewModel.state.currentLevel]
+                * UIScreen.main.bounds.height
         else {
             return
         }
-        
+
         lastLevelCheck = viewModel.state.currentLevel
-        
+
         // Запуск анимации фейерверков при достижении уровня
         launchFireworks(for: viewModel.state.currentLevel)
-        
+
         Task { @MainActor in
-            viewModel.processEvent(.levelReached(level: viewModel.state.currentLevel))
+            viewModel.processEvent(
+                .levelReached(level: viewModel.state.currentLevel))
             // Обновление собранных звёзд
-            viewModel.state.collectedStars = Array(repeating: false, count: Constants.Level.y.count) // Сброс звёзд
-            viewModel.state.collectedStars[viewModel.state.currentLevel] = true // Отметить текущую звезду как собранную
+            viewModel.state.collectedStars = Array(
+                repeating: false, count: Constants.Level.y.count)  // Сброс звёзд
+            viewModel.state.collectedStars[viewModel.state.currentLevel] = true  // Отметить текущую звезду как собранную
         }
     }
-    
+
     private func launchFireworks(for level: Int) {
         // Логика запуска анимации фейерверков для соответствующего уровня
         // Например, можно использовать специальный View для анимации
-        // FireworksView(level: level).show()
+        //        FireworksView()
     }
 }
 
