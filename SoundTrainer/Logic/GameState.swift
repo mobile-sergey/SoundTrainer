@@ -27,7 +27,7 @@ struct GameState: Equatable {
             baseY: 0,
             isSpeaking: false,
             isDetectingActive: false,
-            collectedStars: Array(repeating: false, count: Constants.Level.y.count),
+            collectedStars: Array(repeating: false, count: Constants.Level.heights.count),
             shouldPlayStarAnimation: false,
             shouldShowFireworks: false
         )

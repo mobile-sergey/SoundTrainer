@@ -110,10 +110,18 @@ struct GameScreen: View {
     }
 
     private func checkLevelProgress(newY: CGFloat) {
-        guard viewModel.state.currentLevel < Constants.Level.y.count,
-            lastLevelCheck != viewModel.state.currentLevel,
-            newY >= Constants.Level.y[viewModel.state.currentLevel]
+        guard viewModel.state.currentLevel < Constants.Level.heights.count,
+              lastLevelCheck != viewModel.state.currentLevel
         else {
+            return
+        }
+
+        let screenHeight = UIScreen.main.bounds.height
+        let currentLevelHeight = screenHeight * 
+            Constants.Level.heights[viewModel.state.currentLevel] * 
+            Constants.Level.maxHeight - 50 // 50 - примерная половина высоты звезды
+
+        guard newY >= currentLevelHeight else {
             return
         }
 
@@ -124,16 +132,14 @@ struct GameScreen: View {
         // Анимация перехода на новый уровень
         withAnimation(.easeInOut(duration: 0.5)) {
             // Анимация перемещения космонавта к звезде текущего уровня
-            viewModel.state.position = Constants.Level.y[currentLevel]
+            viewModel.state.position = currentLevelHeight
             viewModel.state.xOffset = -screenWidth/2 + Constants.Level.width * screenWidth/2
         }
 
         Task { @MainActor in
             viewModel.processEvent(.levelReached(level: currentLevel))
             
-            // Если достигнут последний уровень, можно добавить дополнительную логику
-            if currentLevel == Constants.Level.y.count - 1 {
-                // Например, показать поздравление или запустить особую анимацию
+            if currentLevel == Constants.Level.heights.count - 1 {
                 viewModel.state.shouldShowFireworks = true
             }
         }

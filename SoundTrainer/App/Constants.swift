@@ -21,7 +21,6 @@ enum Constants {
         static let width: CGFloat = 0.25  // Относительная ширина уровней
         static let heights: [CGFloat] = [0.35, 0.7, 1.0]  // Относительные высоты уровней
         static let maxHeight: CGFloat = 0.9  // Максимальная относительная высота уровней
-        static let y: [CGFloat] = [230, 480, 680]  // Высоты уровней для звезд
     }
 
     // MARK: - Движение
