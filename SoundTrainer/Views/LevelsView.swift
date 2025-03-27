@@ -101,9 +101,9 @@ struct LevelsView: View {
                                 }
                         } else if !collectedStars[index] {
                             // Показываем статичную звезду если она не собрана
-                            Image(systemName: "star.fill") // или ваша статичная звезда
-                                .foregroundColor(.yellow)
-                                .font(.system(size: 54))
+                            Image("Star") // или ваша статичная звезда
+                                .resizable()
+                                .frame(width: 100, height: 100)
                                 .position(position)
                                 .onAppear {
                                     print("⭐️ Звезда \(index): Показ статичной звезды")

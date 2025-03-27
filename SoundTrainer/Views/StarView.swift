@@ -40,16 +40,18 @@ struct StarView: View {
                 .onAnimationComplete {
                     isAnimating = false
                     showStar = !isCollected
-                    onCollect()
+                    if (isCollected) {
+                        onCollect()
+                    }
                 }
                 .frame(width: 120, height: 120)
                 .position(position)
             }
 
             if showStar {
-                Image(systemName: "star.fill")
-                    .foregroundColor(.yellow)
-                    .font(.system(size: 54))
+                Image("Star")
+                    .resizable()
+                    .frame(width: 120, height: 120)
                     .position(position)
             }
         }
