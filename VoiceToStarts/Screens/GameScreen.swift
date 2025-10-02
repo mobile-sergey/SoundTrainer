@@ -10,13 +10,15 @@ import SwiftUI
 struct GameScreen: View {
     @StateObject private var viewModel: GameViewModel
     @State private var showMicrophoneAlert = false
+    @State private var isSettingsPresented = false
     let onExit: () -> Void
 
     @State private var animatedY: CGFloat = 0
     @State private var lastLevelCheck: Int = 0
 
     init(onExit: @escaping () -> Void) {
-        _viewModel = StateObject(wrappedValue: GameViewModel())
+        let gameSettings = GameSettings()
+        _viewModel = StateObject(wrappedValue: GameViewModel(gameSettings: gameSettings))
         self.onExit = onExit
     }
 
@@ -31,7 +33,8 @@ struct GameScreen: View {
                     Task { @MainActor in
                         viewModel.collectStar(level: level)
                     }
-                }
+                },
+                difficulty: viewModel.state.difficulty
             )
 
             // Основная анимация космонавта
@@ -51,6 +54,7 @@ struct GameScreen: View {
                     .setContentMode(.scaleAspectFill)
                     .edgesIgnoringSafeArea(.all)
             }
+            
         }
         .onChange(of: viewModel.state.position) { newPosition in
             withAnimation(.linear(duration: 0.1)) {
@@ -94,23 +98,41 @@ struct GameScreen: View {
                 "Для работы приложения необходим доступ к микрофону. Пожалуйста, предоставьте разрешение в настройках."
             )
         }
+        .sheet(isPresented: $isSettingsPresented) {
+            SettingsScreen(onBack: {
+                isSettingsPresented = false
+            })
+        }
         .onDisappear {
             Task { @MainActor in
                 viewModel.cleanup()
             }
         }
+        .navigationBarBackButtonHidden(false)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    isSettingsPresented = true
+                }) {
+                    Image(systemName: "gearshape.fill")
+                        .font(.title2)
+                        .foregroundColor(.white)
+                }
+            }
+        }
     }
 
     private func calculateDuration() -> Double {
-        let distance = Constants.Move.riseDistance
+        let distance = viewModel.state.difficulty.riseDistance
         let speed =
             viewModel.state.isSpeaking
-            ? Constants.Move.riseSpeed : Constants.Move.fallSpeed
+            ? viewModel.state.difficulty.riseSpeed : viewModel.state.difficulty.fallSpeed
         return Double(distance) / Double(speed)
     }
 
     private func checkLevelProgress(newY: CGFloat) {
-        guard viewModel.state.currentLevel < Constants.Level.heights.count,
+        guard viewModel.state.currentLevel < viewModel.state.difficulty.levelHeights.count,
               lastLevelCheck != viewModel.state.currentLevel
         else {
             return
@@ -118,7 +140,7 @@ struct GameScreen: View {
 
         let screenHeight = UIScreen.main.bounds.height
         let currentLevelHeight = screenHeight * 
-            Constants.Level.heights[viewModel.state.currentLevel] * 
+            viewModel.state.difficulty.levelHeights[viewModel.state.currentLevel] * 
             Constants.Level.maxHeight - 50 // 50 - примерная половина высоты звезды
 
         guard newY >= currentLevelHeight else {
@@ -139,7 +161,7 @@ struct GameScreen: View {
         Task { @MainActor in
             viewModel.processEvent(.levelReached(level: currentLevel))
             
-            if currentLevel == Constants.Level.heights.count - 1 {
+            if currentLevel == viewModel.state.difficulty.levelHeights.count - 1 {
                 viewModel.state.shouldShowFireworks = true
             }
         }

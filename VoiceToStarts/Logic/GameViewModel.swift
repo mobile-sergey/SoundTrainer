@@ -14,9 +14,11 @@ class GameViewModel: ObservableObject {
     private let speechDetector: SpeechDetector
     private var cancellables = Set<AnyCancellable>()
     private var isPreparingAudio = false
+    private let gameSettings: GameSettings
 
-    init(speechDetector: SpeechDetector = SpeechDetector()) {
+    init(speechDetector: SpeechDetector = SpeechDetector(), gameSettings: GameSettings = GameSettings()) {
         self.speechDetector = speechDetector
+        self.gameSettings = gameSettings
         resetGame()
 
         // Устанавливаем начальное положение ракеты
@@ -25,8 +27,19 @@ class GameViewModel: ObservableObject {
         let screenWidth = UIScreen.main.bounds.width
         state.xOffset =
             -screenWidth / 2 + Constants.Level.width * screenWidth / 2
+        
+        // Устанавливаем правильную базовую позицию в зависимости от сложности
+        let screenHeight = UIScreen.main.bounds.height
+        state.baseY = screenHeight * 0.1 // Начинаем с 10% от высоты экрана
         prepareAudio()
         setupSpeechDetection()
+        
+        // Подписываемся на изменения сложности
+        gameSettings.$difficulty
+            .sink { [weak self] newDifficulty in
+                self?.updateDifficulty(newDifficulty)
+            }
+            .store(in: &cancellables)
     }
 
     // Добавляем метод для предварительной подготовки аудио
@@ -116,9 +129,9 @@ class GameViewModel: ObservableObject {
     }
 
     private func handleSpeakingState(_ soundVolume: Float) {
-        guard state.currentLevel < Constants.Level.heights.count else { return }
+        guard state.currentLevel < state.difficulty.levelHeights.count else { return }
 
-        let isSpeaking: Bool = soundVolume > Constants.Sound.amplitude
+        let isSpeaking: Bool = soundVolume > state.difficulty.amplitudeThreshold
         let targetPosition = calculateNewPosition(
             state: state, isSpeaking: isSpeaking)
 
@@ -140,10 +153,10 @@ class GameViewModel: ObservableObject {
         let targetY: CGFloat
         if isSpeaking {
             targetY = min(
-                state.position + Constants.Move.riseSpeed * 0.1,
+                state.position + state.difficulty.riseSpeed * 0.1,
                 Constants.Cosmo.yMax)
         } else {
-            targetY = max(state.position - Constants.Move.fallSpeed * 0.1, 0)
+            targetY = max(state.position - state.difficulty.fallSpeed * 0.1, 0)
         }
 
         // Проверяем достижение уровней
@@ -165,7 +178,7 @@ class GameViewModel: ObservableObject {
         let screenHeight = UIScreen.main.bounds.height
         // Рассчитываем высоты уровней аналогично LevelsView
         let cosmoWidth: CGFloat = 50
-        let levelHeights = Constants.Level.heights.map { height in
+        let levelHeights = state.difficulty.levelHeights.map { height in
             (screenHeight * height * Constants.Level.maxHeight)
         }
         return target >= levelHeights[level] - cosmoWidth * CGFloat((level + 1)) && state.currentLevel == level
@@ -177,7 +190,7 @@ class GameViewModel: ObservableObject {
         if level < state.collectedStars.count {
             // Отмечаем только текущую звезду как собранную
             var newStars = Array(
-                repeating: false, count: Constants.Level.heights.count)
+                repeating: false, count: state.difficulty.levelHeights.count)
             // Заполняем true все предыдущие звезды и текущую
             for i in 0...level {
                 newStars[i] = true
@@ -189,7 +202,7 @@ class GameViewModel: ObservableObject {
             
             // Устанавливаем новую базовую высоту
             let screenHeight = UIScreen.main.bounds.height
-            newState.baseY = screenHeight * Constants.Level.heights[level] * Constants.Level.maxHeight
+            newState.baseY = screenHeight * state.difficulty.levelHeights[level] * Constants.Level.maxHeight
 
             // Смещаем ракету вправо на ширину уровня
             let screenWidth = UIScreen.main.bounds.width
@@ -198,7 +211,7 @@ class GameViewModel: ObservableObject {
                 * (CGFloat(level + 1) + 0.5)
 
             // Запускаем анимацию фейерверка только для последнего уровня
-            if level == Constants.Level.heights.count - 1 {
+            if level == state.difficulty.levelHeights.count - 1 {
                 newState.shouldShowFireworks = true
             }
 
@@ -221,23 +234,39 @@ class GameViewModel: ObservableObject {
 
     private func resetGame() {
         state = .Initial
+        state.difficulty = gameSettings.difficulty
         state.currentLevel = 0
         state.position = 0
         // Начальное положение - смещение влево на половину экрана и вправо на половину ширины уровня
         let screenWidth = UIScreen.main.bounds.width
         state.xOffset =
             -screenWidth / 2 + Constants.Level.width * screenWidth / 2
+        
+        // Устанавливаем правильную базовую позицию в зависимости от сложности
+        let screenHeight = UIScreen.main.bounds.height
+        state.baseY = screenHeight * 0.1 // Начинаем с 10% от высоты экрана
+        
         state.collectedStars = Array(
-            repeating: false, count: Constants.Level.heights.count)
+            repeating: false, count: state.difficulty.levelHeights.count)
         print("Game state reset")
     }
 
     private func getCurrentLevelHeight(level: Int) -> CGFloat {
-        guard level < Constants.Level.heights.count else {
+        guard level < state.difficulty.levelHeights.count else {
             return GameState.Initial.baseY
         }
         let screenHeight = UIScreen.main.bounds.height
-        return screenHeight * Constants.Level.heights[level] * Constants.Level.maxHeight
+        return screenHeight * state.difficulty.levelHeights[level] * Constants.Level.maxHeight
+    }
+
+    private func updateDifficulty(_ newDifficulty: Constants.Difficulty) {
+        state.difficulty = newDifficulty
+        // Сбрасываем игру при смене сложности
+        resetGame()
+    }
+    
+    func setDifficulty(_ difficulty: Constants.Difficulty) {
+        gameSettings.setDifficulty(difficulty)
     }
 
     func cleanup() {

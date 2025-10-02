@@ -15,6 +15,7 @@ struct StartScreen: View {
     @State private var isGameScreenPresented = false
     @State private var showPermissionDialog = false
     @State private var isRocketAnimationComplete = false
+    @State private var isSettingsPresented = false
 
     var body: some View {
         if #available(iOS 16, *) {
@@ -31,6 +32,22 @@ struct StartScreen: View {
     private var mainContent: some View {
         ZStack {
             StarsFallingBackgroundView()  // Фон со звёздами
+            
+            // Кнопка настроек в правом верхнем углу
+            VStack {
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        isSettingsPresented = true
+                    }) {
+                        Image(systemName: "gearshape.fill")
+                            .font(.title2)
+                            .foregroundColor(Color("ActiveColor"))
+                            .padding()
+                    }
+                }
+                Spacer()
+            }
 
             VStack(spacing: 24) {
                 Text("Voice to stars")
@@ -70,6 +87,7 @@ struct StartScreen: View {
                         .transition(.opacity.animation(.easeIn(duration: 0.5)))
                 }
 
+
                 Button(action: {
                     os_log("Start button clicked", log: .default, type: .debug)
                     checkMicrophonePermission()
@@ -94,6 +112,7 @@ struct StartScreen: View {
                     if #available(iOS 16, *) {
                         NavigationLink(
                             destination: GameScreen(onExit: {
+                                isGameScreenPresented = false  // Закрываем экран игры
                                 isRocketAnimationComplete = false  // Сбрасываем состояние анимации при выходе
                             }),
                             isActive: $isGameScreenPresented,
@@ -103,6 +122,7 @@ struct StartScreen: View {
                         NavigationLink(
                             "",
                             destination: GameScreen(onExit: {
+                                isGameScreenPresented = false  // Закрываем экран игры
                                 isRocketAnimationComplete = false  // Сбрасываем состояние анимации при выходе
                             }),
                             isActive: $isGameScreenPresented
@@ -118,6 +138,11 @@ struct StartScreen: View {
             } message: {
                 Text(
                     "Для игры необходимо разрешение на использование микрофона")
+            }
+            .sheet(isPresented: $isSettingsPresented) {
+                SettingsScreen(onBack: {
+                    isSettingsPresented = false
+                })
             }
         }
     }

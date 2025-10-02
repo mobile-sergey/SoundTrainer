@@ -18,6 +18,7 @@ struct GameState: Equatable {
     var collectedStars: [Bool]
     var shouldPlayStarAnimation: Bool
     var shouldShowFireworks: Bool
+    var difficulty: Constants.Difficulty // Уровень сложности игры
     
     static var Initial: GameState {
         GameState(
@@ -27,9 +28,10 @@ struct GameState: Equatable {
             baseY: 0,
             isSpeaking: false,
             isDetectingActive: false,
-            collectedStars: Array(repeating: false, count: Constants.Level.heights.count),
+            collectedStars: Array(repeating: false, count: 3),
             shouldPlayStarAnimation: false,
-            shouldShowFireworks: false
+            shouldShowFireworks: false,
+            difficulty: .easy
         )
     }
 }

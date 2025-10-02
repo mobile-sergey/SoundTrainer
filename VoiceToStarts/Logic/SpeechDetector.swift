@@ -94,7 +94,7 @@ actor SpeechDetector {
             print("Starting recording...")
             
             // Создаем и сохраняем подписку на таймер
-            timerCancellable = Timer.publish(every: Constants.Sound.сheckInterval, on: .main, in: .common)
+            timerCancellable = Timer.publish(every: 0.1, on: .main, in: .common)
                 .autoconnect()
                 .sink { [weak self] _ in
                     guard let self = self else { return }

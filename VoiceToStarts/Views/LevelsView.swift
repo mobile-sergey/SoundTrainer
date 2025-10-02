@@ -10,6 +10,7 @@ import SwiftUI
 struct LevelsView: View {
     let collectedStars: [Bool]
     let onStarCollected: (Int) -> Void
+    let difficulty: Constants.Difficulty
 
     // Состояния для анимации
     @State private var starPositions: [Int: CGPoint] = [:]
@@ -47,9 +48,9 @@ struct LevelsView: View {
         let stairWidth = geometry.size.width * Constants.Level.width
 
         return ZStack {
-            ForEach(0..<3) { index in
+            ForEach(0..<difficulty.levelHeights.count) { index in
                 let height =
-                geometry.size.height * Constants.Level.heights[index]
+                geometry.size.height * difficulty.levelHeights[index]
                 let currentX =
                     geometry.size.width - stairWidth * 2.5
                     + (CGFloat(index) * stairWidth)
@@ -185,7 +186,8 @@ extension Color {
 #Preview {
     LevelsView(
         collectedStars: [false, true, false],
-        onStarCollected: { _ in }
+        onStarCollected: { _ in },
+        difficulty: .easy
     )
     .frame(width: 400, height: 600)
     .background(Color.black)
