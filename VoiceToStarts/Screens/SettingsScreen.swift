@@ -44,16 +44,16 @@ struct SettingsScreen: View {
                         .padding(.horizontal, 24)
                     
                     VStack(spacing: 12) {
-                        ForEach(Constants.Difficulty.allCases, id: \.self) { difficulty in
-                            DifficultyOption(
-                                difficulty: difficulty,
-                                isSelected: selectedDifficulty == difficulty,
-                                onSelected: {
-                                    selectedDifficulty = difficulty
-                                    gameSettings.setDifficulty(difficulty)
+                                ForEach(Constants.Difficulty.allCases, id: \.id) { difficulty in
+                                    DifficultyOption(
+                                        difficulty: difficulty,
+                                        isSelected: selectedDifficulty.name == difficulty.name,
+                                        onSelected: {
+                                            selectedDifficulty = difficulty
+                                            gameSettings.setDifficulty(difficulty)
+                                        }
+                                    )
                                 }
-                            )
-                        }
                     }
                     .padding(.horizontal, 24)
                 }
@@ -80,7 +80,7 @@ struct DifficultyOption: View {
                     .foregroundColor(isSelected ? Color("ActiveColor") : Color.gray)
                     .font(.title2)
                 
-                Text(difficulty.rawValue)
+                        Text(difficulty.name)
                     .font(.body)
                     .foregroundColor(Color("ActiveColor"))
                 

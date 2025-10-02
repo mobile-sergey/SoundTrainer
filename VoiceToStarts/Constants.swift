@@ -9,82 +9,63 @@ import SwiftUI
 import Foundation
 
 enum Constants {
-
+    
     // MARK: - Уровни сложности
-    enum Difficulty: String, CaseIterable {
-        case easy = "Легкий"
-        case medium = "Средний"
-        case hard = "Сложный"
+    struct Difficulty: Equatable, Identifiable {
+        let id = UUID()
+        let name: String
+        let levelHeights: [CGFloat]
+        let amplitudeThreshold: Float
+        let riseSpeed: CGFloat
+        let fallSpeed: CGFloat
+        let riseDistance: CGFloat
+        let checkInterval: TimeInterval
         
-        var levelHeights: [CGFloat] {
-            switch self {
-            case .easy:
-                return [0.35, 0.7, 1.0]
-            case .medium:
-                return [0.42, 0.75, 1.0]
-            case .hard:
-                return [0.45, 0.8, 1.0]
-            }
-        }
+        static let easy = Difficulty(
+            name: "Легкий",
+            levelHeights: [0.35, 0.7, 1.0],
+            amplitudeThreshold: 5.0,
+            riseSpeed: 100.0,
+            fallSpeed: 50.0,
+            riseDistance: 10.0,
+            checkInterval: 0.1
+        )
         
-        var amplitudeThreshold: Float {
-            switch self {
-            case .easy:
-                return 5.0
-            case .medium:
-                return 10.0
-            case .hard:
-                return 15.0
-            }
-        }
+        static let medium = Difficulty(
+            name: "Средний",
+            levelHeights: [0.42, 0.75, 1.0],
+            amplitudeThreshold: 10.0,
+            riseSpeed: 120.0,
+            fallSpeed: 60.0,
+            riseDistance: 8.0,
+            checkInterval: 0.1
+        )
         
-        var riseDistance: CGFloat {
-            switch self {
-            case .easy:
-                return 10.0
-            case .medium:
-                return 8.0
-            case .hard:
-                return 6.0
-            }
-        }
+        static let hard = Difficulty(
+            name: "Сложный",
+            levelHeights: [0.45, 0.8, 1.0],
+            amplitudeThreshold: 15.0,
+            riseSpeed: 150.0,
+            fallSpeed: 80.0,
+            riseDistance: 6.0,
+            checkInterval: 0.1
+        )
         
-        var riseSpeed: CGFloat {
-            switch self {
-            case .easy:
-                return 100.0
-            case .medium:
-                return 120.0
-            case .hard:
-                return 150.0
-            }
-        }
-        
-        var fallSpeed: CGFloat {
-            switch self {
-            case .easy:
-                return 50.0
-            case .medium:
-                return 60.0
-            case .hard:
-                return 80.0
-            }
-        }
+        static let allCases: [Difficulty] = [.easy, .medium, .hard]
     }
-
+    
     // MARK: - Космонавт
     enum Cosmo {
         static let yOffset: CGFloat = 550  // Коррекция начальной позиции космонавта (внизу экрана)
         static let yMax: CGFloat = 800  // Максимальная позиция космонавта (вверху экрана)
-
     }
-
+    
     // MARK: - Уровни
     enum Level {
         static let width: CGFloat = 0.25  // Относительная ширина уровней
         static let maxHeight: CGFloat = 0.9  // Максимальная относительная высота уровней
     }
-
+    
     // MARK: - Анимации
     enum Anim {
         static let austronaut: String = "astronaut_animation"

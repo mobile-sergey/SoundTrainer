@@ -23,13 +23,15 @@ class GameSettings: ObservableObject {
     }
     
     private func loadDifficulty() {
-        if let savedDifficulty = userDefaults.string(forKey: difficultyKey),
-           let difficulty = Constants.Difficulty(rawValue: savedDifficulty) {
-            self.difficulty = difficulty
+        if let savedDifficultyName = userDefaults.string(forKey: difficultyKey) {
+            if let difficulty = Constants.Difficulty.allCases.first(where: { $0.name == savedDifficultyName }) {
+                self.difficulty = difficulty
+            }
         }
     }
     
     private func saveDifficulty() {
-        userDefaults.set(difficulty.rawValue, forKey: difficultyKey)
+        userDefaults.set(difficulty.name, forKey: difficultyKey)
     }
 }
+

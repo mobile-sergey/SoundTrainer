@@ -25,8 +25,7 @@ class GameViewModel: ObservableObject {
         state.position = 0
         // Смещаем ракету влево на половину ширины экрана и вправо на половину ширины уровня
         let screenWidth = UIScreen.main.bounds.width
-        state.xOffset =
-            -screenWidth / 2 + Constants.Level.width * screenWidth / 2
+        state.xOffset = -screenWidth / 2 + Constants.Level.width * screenWidth / 2
         
         // Устанавливаем правильную базовую позицию в зависимости от сложности
         let screenHeight = UIScreen.main.bounds.height
