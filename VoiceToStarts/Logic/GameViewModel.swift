@@ -21,15 +21,8 @@ class GameViewModel: ObservableObject {
         self.gameSettings = gameSettings
         resetGame()
 
-        // Устанавливаем начальное положение ракеты
-        state.position = 0
-        // Смещаем ракету влево на половину ширины экрана и вправо на половину ширины уровня
-        let screenWidth = UIScreen.main.bounds.width
-        state.xOffset = -screenWidth / 2 + Constants.Level.width * screenWidth / 2
-        
-        // Устанавливаем правильную базовую позицию в зависимости от сложности
-        let screenHeight = UIScreen.main.bounds.height
-        state.baseY = screenHeight * 0.1 // Начинаем с 10% от высоты экрана
+        // Устанавливаем начальное положение космонавта в стартовой позиции
+        state.cosmoPosition = Constants.CosmoPosition.zero
         prepareAudio()
         setupSpeechDetection()
         
@@ -136,13 +129,13 @@ class GameViewModel: ObservableObject {
 
         // Создаем новый экземпляр GameState с обновленной позицией
         var newState = state
-        newState.position = targetPosition
+        newState.cosmoPosition = Constants.CosmoPosition(x: state.cosmoPosition.x, y: targetPosition)
 
         // Обновляем состояние
         state = newState
 
         print(
-            "Speaking: \(isSpeaking), Position: \(state.position), Current Level: \(state.currentLevel), Sound Volume: \(soundVolume)"
+            "Speaking: \(isSpeaking), Position: \(state.cosmoPosition.y), Current Level: \(state.currentLevel), Sound Volume: \(soundVolume)"
         )
     }
 
@@ -152,10 +145,10 @@ class GameViewModel: ObservableObject {
         let targetY: CGFloat
         if isSpeaking {
             targetY = min(
-                state.position + state.difficulty.riseSpeed * 0.1,
+                state.cosmoPosition.y + state.difficulty.riseSpeed * 0.1,
                 Constants.Cosmo.yMax)
         } else {
-            targetY = max(state.position - state.difficulty.fallSpeed * 0.1, 0)
+            targetY = max(state.cosmoPosition.y - state.difficulty.fallSpeed * 0.1, 0)
         }
 
         // Проверяем достижение уровней
@@ -199,15 +192,13 @@ class GameViewModel: ObservableObject {
             // Увеличиваем текущий уровень
             newState.currentLevel = level + 1
             
-            // Устанавливаем новую базовую высоту
+            // Устанавливаем новую позицию космонавта
             let screenHeight = UIScreen.main.bounds.height
-            newState.baseY = screenHeight * state.difficulty.levelHeights[level] * Constants.Level.maxHeight
-
-            // Смещаем ракету вправо на ширину уровня
             let screenWidth = UIScreen.main.bounds.width
-            newState.xOffset =
-                -screenWidth / 2 + Constants.Level.width * screenWidth
-                * (CGFloat(level + 1) + 0.5)
+            let newY = screenHeight * state.difficulty.levelHeights[level] * Constants.Level.maxHeight
+            let newX = -screenWidth / 2 + Constants.Level.width * screenWidth * (CGFloat(level + 1) + 0.5)
+            
+            newState.cosmoPosition = Constants.CosmoPosition(x: newX, y: newY)
 
             // Запускаем анимацию фейерверка только для последнего уровня
             if level == state.difficulty.levelHeights.count - 1 {
@@ -235,15 +226,7 @@ class GameViewModel: ObservableObject {
         state = .Initial
         state.difficulty = gameSettings.difficulty
         state.currentLevel = 0
-        state.position = 0
-        // Начальное положение - смещение влево на половину экрана и вправо на половину ширины уровня
-        let screenWidth = UIScreen.main.bounds.width
-        state.xOffset =
-            -screenWidth / 2 + Constants.Level.width * screenWidth / 2
-        
-        // Устанавливаем правильную базовую позицию в зависимости от сложности
-        let screenHeight = UIScreen.main.bounds.height
-        state.baseY = screenHeight * 0.1 // Начинаем с 10% от высоты экрана
+        state.cosmoPosition = Constants.CosmoPosition.zero
         
         state.collectedStars = Array(
             repeating: false, count: state.difficulty.levelHeights.count)
@@ -252,7 +235,7 @@ class GameViewModel: ObservableObject {
 
     private func getCurrentLevelHeight(level: Int) -> CGFloat {
         guard level < state.difficulty.levelHeights.count else {
-            return GameState.Initial.baseY
+            return GameState.Initial.cosmoPosition.y
         }
         let screenHeight = UIScreen.main.bounds.height
         return screenHeight * state.difficulty.levelHeights[level] * Constants.Level.maxHeight

@@ -9,10 +9,8 @@
 import Foundation
 
 struct GameState: Equatable {
-    var position: CGFloat               // Текущая позиция космонавта, управляется анимацией
+    var cosmoPosition: Constants.CosmoPosition // Позиция космонавта (x, y)
     var currentLevel: Int               // Текущий достигнутый уровень (индекс в списке уровней)
-    var xOffset: CGFloat                // Смещение космонавта по X при переходе на новый уровень
-    var baseY: CGFloat                  // Базовая позиция Y, от которой рассчитывается подъем/падение космонавта
     var isSpeaking: Bool                // Флаг, указывающий, говорит ли пользователь в данный момент
     var isDetectingActive: Bool
     var collectedStars: [Bool]
@@ -22,10 +20,8 @@ struct GameState: Equatable {
     
     static var Initial: GameState {
         GameState(
-            position: 0,
+            cosmoPosition: Constants.CosmoPosition.zero,
             currentLevel: 0,
-            xOffset: -150,
-            baseY: 0,
             isSpeaking: false,
             isDetectingActive: false,
             collectedStars: Array(repeating: false, count: 3),

@@ -26,7 +26,7 @@ struct GameScreen: View {
         ZStack {
             BackgroundView().modifier(StarTwinkleModifier())
 
-            // Уровни и звёзды
+            // Уровни, звёзды и космонавт
             LevelsView(
                 collectedStars: viewModel.state.collectedStars,
                 onStarCollected: { level in
@@ -34,18 +34,10 @@ struct GameScreen: View {
                         viewModel.collectStar(level: level)
                     }
                 },
-                difficulty: viewModel.state.difficulty
+                difficulty: viewModel.state.difficulty,
+                cosmoPosition: viewModel.state.cosmoPosition,
+                currentLevel: viewModel.state.currentLevel
             )
-
-            // Основная анимация космонавта
-            AnimationView(name: Constants.Anim.austronaut)
-                .setLoopMode(.loop)
-                .setContentMode(.scaleAspectFill)
-                .frame(width: 180, height: 180)
-                .offset(
-                    x: viewModel.state.xOffset,
-                    y: UIScreen.main.bounds.height - Constants.Cosmo.yOffset
-                        - viewModel.state.position)
 
             // Анимация фейерверка на весь экран
             if viewModel.state.shouldShowFireworks {
@@ -56,7 +48,7 @@ struct GameScreen: View {
             }
             
         }
-        .onChange(of: viewModel.state.position) { newPosition in
+        .onChange(of: viewModel.state.cosmoPosition.y) { newPosition in
             withAnimation(.linear(duration: 0.1)) {
                 animatedY = newPosition
             }
@@ -69,7 +61,7 @@ struct GameScreen: View {
             transaction.animation = .default
         }
         .onAppear {
-            animatedY = viewModel.state.position
+            animatedY = viewModel.state.cosmoPosition.y
             // Запрашиваем разрешение перед началом записи
             SpeechDetector.requestMicrophonePermission { granted in
                 if granted {
@@ -139,11 +131,14 @@ struct GameScreen: View {
         }
 
         let screenHeight = UIScreen.main.bounds.height
-        let currentLevelHeight = screenHeight * 
-            viewModel.state.difficulty.levelHeights[viewModel.state.currentLevel] * 
-            Constants.Level.maxHeight - 50 // 50 - примерная половина высоты звезды
+        let levelHeight = viewModel.state.difficulty.levelHeights[viewModel.state.currentLevel]
+        // Вычисляем высоту столбца
+        let columnHeight = screenHeight * levelHeight * Constants.Level.maxHeight
+        // Космонавт должен быть на уровне верха столбца
+        // targetPosition - это высота подъема космонавта от основания столбцов
+        let targetPosition = columnHeight
 
-        guard newY >= currentLevelHeight else {
+        guard newY >= targetPosition else {
             return
         }
 
@@ -151,19 +146,22 @@ struct GameScreen: View {
         let currentLevel = viewModel.state.currentLevel
         let screenWidth = UIScreen.main.bounds.width
         
-        // Анимация перехода на новый уровень
-        withAnimation(.easeInOut(duration: 0.5)) {
-            // Анимация перемещения космонавта к звезде текущего уровня
-            viewModel.state.position = currentLevelHeight
-            viewModel.state.xOffset = -screenWidth/2 + Constants.Level.width * screenWidth/2
-        }
-
         Task { @MainActor in
             viewModel.processEvent(.levelReached(level: currentLevel))
             
             if currentLevel == viewModel.state.difficulty.levelHeights.count - 1 {
                 viewModel.state.shouldShowFireworks = true
             }
+        }
+        
+        // Анимация перехода на новый уровень
+        withAnimation(.easeInOut(duration: 0.5)) {
+            // Обновляем только вертикальную позицию космонавта
+            // Горизонтальное позиционирование теперь обрабатывается в LevelsView
+            viewModel.state.cosmoPosition = Constants.CosmoPosition(
+                x: 0, // Горизонтальное смещение не нужно, так как currentLevel обрабатывается в LevelsView
+                y: targetPosition
+            )
         }
     }
 

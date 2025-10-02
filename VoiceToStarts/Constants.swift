@@ -55,8 +55,16 @@ enum Constants {
     }
     
     // MARK: - Космонавт
+    struct CosmoPosition: Equatable {
+        let x: CGFloat
+        let y: CGFloat
+        
+        static let zero = CosmoPosition(x: 0, y: 0)
+    }
+    
     enum Cosmo {
-        static let yOffset: CGFloat = 550  // Коррекция начальной позиции космонавта (внизу экрана)
+        static let width: CGFloat = 180
+        static let height: CGFloat = 180
         static let yMax: CGFloat = 800  // Максимальная позиция космонавта (вверху экрана)
     }
     
