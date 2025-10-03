@@ -144,7 +144,6 @@ struct GameScreen: View {
 
         lastLevelCheck = viewModel.state.currentLevel
         let currentLevel = viewModel.state.currentLevel
-        let screenWidth = UIScreen.main.bounds.width
         
         Task { @MainActor in
             viewModel.processEvent(.levelReached(level: currentLevel))

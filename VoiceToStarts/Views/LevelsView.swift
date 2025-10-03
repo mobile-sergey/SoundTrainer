@@ -26,12 +26,14 @@ struct LevelsView: View {
                 drawStars()
                 drawAstronaut(geometry)
             }
-        }
-        .onAppear {
-            print("🌟 LevelsView появился. Начальное состояние звёзд:", collectedStars)
-            // Отключаем начальную анимацию через 1 секунду
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                initialAnimationCompleted = true
+            .onAppear {
+                print("🌟 LevelsView появился. Начальное состояние звёзд:", collectedStars)
+                // Инициализируем позиции звезд для превью
+                initializeStarPositions(geometry)
+                // Отключаем начальную анимацию через 1 секунду
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    initialAnimationCompleted = true
+                }
             }
         }
         .onChange(of: collectedStars) { newStars in
@@ -56,6 +58,8 @@ struct LevelsView: View {
                 // Используем пропорциональную высоту для всех столбиков
                 let height = geometry.size.height * levelHeight * Constants.Level.maxHeight
                 let currentX = geometry.size.width - stairWidth * 2.5 + (CGFloat(index) * stairWidth)
+                let starDistance = geometry.size.height * Constants.Star.distanceFromColumn
+                let currentY = geometry.size.height - height - starDistance
 
                 RoundedRectangle(cornerRadius: 25)
                     .fill(
@@ -74,11 +78,8 @@ struct LevelsView: View {
                         y: geometry.size.height - height / 2
                     )
                     .onChange(of: geometry.size) { _ in
-                        // Обновляем позиции звезд
-                        starPositions[index] = CGPoint(
-                            x: currentX,
-                            y: geometry.size.height - height + (CGFloat(index) * stairWidth / 3)
-                        )
+                        // Обновляем позиции звезд - точно над столбцами
+                        starPositions[index] = CGPoint(x: currentX, y: currentY)
                     }
             }
         }
@@ -132,6 +133,21 @@ struct LevelsView: View {
         }
     }
 
+    private func initializeStarPositions(_ geometry: GeometryProxy) {
+        // Инициализируем позиции звезд для превью
+        // Используем размеры превью из Constants или стандартные размеры
+        let stairWidth = geometry.size.width * Constants.Level.width
+        
+        for index in 0..<difficulty.levelHeights.count {
+            let levelHeight = difficulty.levelHeights[index]
+            let height = geometry.size.height * levelHeight * Constants.Level.maxHeight
+            let currentX = geometry.size.width - stairWidth * 2.5 + (CGFloat(index) * stairWidth)
+            let starDistance = geometry.size.height * Constants.Star.distanceFromColumn
+            let currentY = geometry.size.height - height - starDistance
+            starPositions[index] = CGPoint(x: currentX, y: currentY)
+        }
+    }
+
     private func drawAstronaut(_ geometry: GeometryProxy) -> some View {
         // Новая система координат: (0,0) в левом нижнем углу
         // X увеличивается вправо, Y увеличивается вверх
@@ -177,6 +193,6 @@ struct LevelsView: View {
             cosmoPosition: Constants.CosmoPosition.zero,
             currentLevel: 0
         )
-        .frame(width: 400, height: 600)
+        .frame(width: 400, height: 800)
         .background(Color.black)
     }

@@ -33,7 +33,7 @@ enum Constants {
         
         static let medium = Difficulty(
             name: "Средний", // Умеренный уровень сложности
-            levelHeights: [0.35, 0.65, 0.9], // Средние уровни - требует больше усилий, последний уровень ниже максимума
+            levelHeights: [0.3, 0.6, 0.9], // Средние уровни - требует больше усилий, последний уровень ниже максимума
             amplitudeThreshold: 10.0, // Средний порог - нужен более громкий звук
             riseSpeed: 120.0, // Умеренная скорость подъема
             fallSpeed: 70.0, // Быстрее падает - сложнее удерживать высоту
@@ -65,13 +65,17 @@ enum Constants {
     enum Cosmo {
         static let width: CGFloat = 180
         static let height: CGFloat = 180
-        static let yMax: CGFloat = 800  // Максимальная позиция космонавта (вверху экрана)
     }
     
     // MARK: - Уровни
     enum Level {
         static let width: CGFloat = 0.25  // Относительная ширина уровней
         static let maxHeight: CGFloat = 0.9  // Максимальная относительная высота уровней
+    }
+    
+    // MARK: - Звезды
+    enum Star {
+        static let distanceFromColumn: CGFloat = 0.1  // Расстояние от столбца (10% от высоты экрана)
     }
     
     // MARK: - Анимации

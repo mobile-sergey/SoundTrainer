@@ -139,14 +139,10 @@ class GameViewModel: ObservableObject {
         )
     }
 
-    private func calculateNewPosition(state: GameState, isSpeaking: Bool)
-        -> CGFloat
-    {
+    private func calculateNewPosition(state: GameState, isSpeaking: Bool) -> CGFloat {
         let targetY: CGFloat
         if isSpeaking {
-            targetY = min(
-                state.cosmoPosition.y + state.difficulty.riseSpeed * 0.1,
-                Constants.Cosmo.yMax)
+            targetY = min(state.cosmoPosition.y + state.difficulty.riseSpeed * 0.1, UIScreen.main.bounds.height * Constants.Level.maxHeight)
         } else {
             targetY = max(state.cosmoPosition.y - state.difficulty.fallSpeed * 0.1, 0)
         }
