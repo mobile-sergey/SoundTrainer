@@ -90,7 +90,12 @@ struct StartScreen: View {
 
                 Button(action: {
                     os_log("Start button clicked", log: .default, type: .debug)
-                    checkMicrophonePermission()
+                    print("🚀 Start button clicked - isGameScreenPresented: \(isGameScreenPresented)")
+                    
+                    // Принудительно обновляем UI
+                    DispatchQueue.main.async {
+                        self.checkMicrophonePermission()
+                    }
                 }) {
                     Text("Начать игру")
                         .font(.title2)
@@ -149,30 +154,48 @@ struct StartScreen: View {
 
     private func checkMicrophonePermission() {
         os_log("Checking microphone permission", log: .default, type: .debug)
+        print("🎤 Checking microphone permission")
+        
         switch AVAudioSession.sharedInstance().recordPermission {
         case .granted:
             os_log("Permission already granted", log: .default, type: .debug)
-            isGameScreenPresented = true
+            print("✅ Permission already granted - setting isGameScreenPresented = true")
+            DispatchQueue.main.async {
+                print("🔄 Setting isGameScreenPresented = true on main thread")
+                self.isGameScreenPresented = true
+                print("🔄 isGameScreenPresented is now: \(self.isGameScreenPresented)")
+                
+                // Дополнительная проверка через небольшую задержку
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    if !self.isGameScreenPresented {
+                        print("⚠️ NavigationLink not working, trying alternative approach")
+                        self.isGameScreenPresented = true
+                    }
+                }
+            }
         case .denied:
             os_log("Permission denied", log: .default, type: .debug)
+            print("❌ Permission denied - showing dialog")
             showPermissionDialog = true
         case .undetermined:
             os_log("Requesting permission", log: .default, type: .debug)
+            print("❓ Requesting permission")
             AVAudioSession.sharedInstance().requestRecordPermission { granted in
                 DispatchQueue.main.async {
                     if granted {
-                        os_log(
-                            "Permission granted", log: .default, type: .debug)
-                        isGameScreenPresented = true
+                        os_log("Permission granted", log: .default, type: .debug)
+                        print("✅ Permission granted - setting isGameScreenPresented = true")
+                        self.isGameScreenPresented = true
+                        print("🔄 isGameScreenPresented is now: \(self.isGameScreenPresented)")
                     } else {
-                        os_log(
-                            "Permission denied after request", log: .default,
-                            type: .debug)
-                        showPermissionDialog = true
+                        os_log("Permission denied after request", log: .default, type: .debug)
+                        print("❌ Permission denied after request - showing dialog")
+                        self.showPermissionDialog = true
                     }
                 }
             }
         @unknown default:
+            print("⚠️ Unknown permission state")
             break
         }
     }
